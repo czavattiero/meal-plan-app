@@ -35,7 +35,7 @@ export default async function WeekPage({ params }: Props) {
         </div>
       </div>
 
-      {weekData.days.map(day => (
+      {weekData.days.map((day: import('@/types').DayPlan) => (
         <div key={day.day} style={{ marginBottom: '28px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
             <div style={{
@@ -81,7 +81,7 @@ export default async function WeekPage({ params }: Props) {
           Week {weekNum} Snacks
         </h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {weekData.snacks.map(snack => (
+          {weekData.snacks.map((snack: import('@/types').Snack) => (
             <div key={snack.id} style={{
               background: '#ffffff', border: '0.5px solid #cce4d6',
               borderRadius: '10px', padding: '12px 14px',
