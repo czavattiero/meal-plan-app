@@ -1,6 +1,8 @@
 'use client'
 import { useEffect } from 'react'
 
+const PUSH_SUBSCRIBED_KEY = 'meal-plan-push-subscribed'
+
 function getOrCreateDeviceId(): string {
   let id = localStorage.getItem('meal-plan-device-id')
   if (!id) {
@@ -21,41 +23,66 @@ function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
   return outputArray.buffer
 }
 
-export function usePushSubscription() {
-  useEffect(() => {
-    async function subscribe() {
-      if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
-      if (localStorage.getItem('meal-plan-push-subscribed') === 'true') return
+function clearPushSubscriptionFlag() {
+  localStorage.removeItem(PUSH_SUBSCRIBED_KEY)
+}
 
-      const permission = await Notification.requestPermission()
-      if (permission !== 'granted') return
+export async function subscribeToPush(): Promise<boolean> {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false
 
-      try {
-        const registration = await navigator.serviceWorker.register('/sw.js')
-        await navigator.serviceWorker.ready
+  if (localStorage.getItem(PUSH_SUBSCRIBED_KEY) === 'true') return true
 
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(
-            process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
-          ),
-        })
+  if (Notification.permission !== 'granted') {
+    clearPushSubscriptionFlag()
+    return false
+  }
 
-        const deviceId = getOrCreateDeviceId()
-        const res = await fetch('/api/push/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ subscription, deviceId }),
-        })
+  const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
 
-        if (res.ok) {
-          localStorage.setItem('meal-plan-push-subscribed', 'true')
-        }
-      } catch (err) {
-        console.error('Push subscription failed:', err)
-      }
+  if (!vapidPublicKey) {
+    clearPushSubscriptionFlag()
+    return false
+  }
+
+  try {
+    const registration = await navigator.serviceWorker.register('/sw.js')
+    await navigator.serviceWorker.ready
+
+    const existingSubscription = await registration.pushManager.getSubscription()
+    const subscription =
+      existingSubscription ??
+      (await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+      }))
+
+    const deviceId = getOrCreateDeviceId()
+    const res = await fetch('/api/push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subscription, deviceId }),
+    })
+
+    if (!res.ok) {
+      clearPushSubscriptionFlag()
+      return false
     }
 
-    subscribe()
+    localStorage.setItem(PUSH_SUBSCRIBED_KEY, 'true')
+    return true
+  } catch (err) {
+    clearPushSubscriptionFlag()
+    console.error('Push subscription failed:', err)
+    return false
+  }
+}
+
+export function usePushSubscription() {
+  useEffect(() => {
+    if (Notification.permission === 'denied') {
+      clearPushSubscriptionFlag()
+    }
+
+    void subscribeToPush()
   }, [])
 }
