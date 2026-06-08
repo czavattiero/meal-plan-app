@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useNotifications } from '@/hooks/useNotifications'
-import { usePushSubscription } from '@/hooks/usePushSubscription'
+import { subscribeToPush, usePushSubscription } from '@/hooks/usePushSubscription'
 import NotificationBanner from './NotificationBanner'
 
 export default function NotificationProvider({
@@ -31,8 +31,15 @@ export default function NotificationProvider({
           <div style={{ display: 'flex', gap: '8px' }}>
             <button
               onClick={async () => {
-                await Notification.requestPermission()
-                setShowPrompt(false)
+                const permission = await Notification.requestPermission()
+                if (permission === 'granted') {
+                  const subscribed = await subscribeToPush()
+                  setShowPrompt(!subscribed)
+                  return
+                }
+
+                localStorage.removeItem('meal-plan-push-subscribed')
+                setShowPrompt(permission === 'default')
               }}
               style={{
                 background: '#f0b429',
