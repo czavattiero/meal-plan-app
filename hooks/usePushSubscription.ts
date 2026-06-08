@@ -10,7 +10,7 @@ function getOrCreateDeviceId(): string {
   return id
 }
 
-function urlBase64ToUint8Array(base64String: string) {
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
   const rawData = window.atob(base64)
@@ -25,14 +25,15 @@ export function usePushSubscription() {
   useEffect(() => {
     async function subscribe() {
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
-
       if (localStorage.getItem('meal-plan-push-subscribed') === 'true') return
 
       const permission = await Notification.requestPermission()
       if (permission !== 'granted') return
 
       try {
-        const registration = await navigator.serviceWorker.ready
+        const registration = await navigator.serviceWorker.register('/sw.js')
+        await navigator.serviceWorker.ready
+
         const subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(
@@ -41,7 +42,6 @@ export function usePushSubscription() {
         })
 
         const deviceId = getOrCreateDeviceId()
-
         const res = await fetch('/api/push/subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
