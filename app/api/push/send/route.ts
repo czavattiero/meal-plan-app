@@ -1,8 +1,17 @@
-import { kv } from '@vercel/kv'
+import { Redis } from '@upstash/redis'
 import webpush from 'web-push'
 import { NextResponse } from 'next/server'
 
-if (process.env.VAPID_EMAIL && process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+const kv = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+})
+
+if (
+  process.env.VAPID_EMAIL &&
+  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY &&
+  process.env.VAPID_PRIVATE_KEY
+) {
   webpush.setVapidDetails(
     process.env.VAPID_EMAIL,
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
