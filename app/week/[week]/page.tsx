@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { getWeek } from '@/lib/mealData'
+import { DayPlan, Snack } from '@/types'
 import MealCard from '@/components/MealCard'
 import GroceryChecklist from '@/components/GroceryChecklist'
 
@@ -21,10 +22,7 @@ export default async function WeekPage({ params }: Props) {
         borderRadius: '14px', padding: '18px 20px',
         marginBottom: '20px', color: '#ffffff',
       }}>
-        <div style={{
-          fontSize: '10px', letterSpacing: '0.2em',
-          textTransform: 'uppercase', color: '#f0b429', marginBottom: '4px',
-        }}>
+        <div style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#f0b429', marginBottom: '4px' }}>
           Week {weekNum}
         </div>
         <div style={{ fontSize: '20px', fontWeight: 700, marginBottom: '4px' }}>
@@ -35,7 +33,7 @@ export default async function WeekPage({ params }: Props) {
         </div>
       </div>
 
-      {weekData.days.map((day: import('@/types').DayPlan) => (
+      {weekData.days.map((day: DayPlan) => (
         <div key={day.day} style={{ marginBottom: '28px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
             <div style={{
@@ -47,9 +45,7 @@ export default async function WeekPage({ params }: Props) {
               {day.day}
             </div>
             <div>
-              <div style={{ fontSize: '14px', fontWeight: 600, color: '#0f2419' }}>
-                Day {day.day}
-              </div>
+              <div style={{ fontSize: '14px', fontWeight: 600, color: '#0f2419' }}>Day {day.day}</div>
               <div style={{ fontSize: '11px', color: '#5a7a68' }}>
                 {day.breakfast.calories + day.lunch.calories + day.dinner.calories} kcal meals total
               </div>
@@ -81,7 +77,7 @@ export default async function WeekPage({ params }: Props) {
           Week {weekNum} Snacks
         </h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {weekData.snacks.map((snack: import('@/types').Snack) => (
+          {weekData.snacks.map((snack: Snack) => (
             <div key={snack.id} style={{
               background: '#ffffff', border: '0.5px solid #cce4d6',
               borderRadius: '10px', padding: '12px 14px',
