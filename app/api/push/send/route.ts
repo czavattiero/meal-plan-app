@@ -7,18 +7,25 @@ const kv = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 })
 
-if (!process.env.VAPID_EMAIL || !process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
-  throw new Error('VAPID environment variables are not configured')
-}
+let vapidInitialized = false
 
-webpush.setVapidDetails(
-  process.env.VAPID_EMAIL,
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
-)
+function initVapid() {
+  if (vapidInitialized) return
+  if (!process.env.VAPID_EMAIL || !process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+    throw new Error('VAPID environment variables are not configured')
+  }
+  webpush.setVapidDetails(
+    process.env.VAPID_EMAIL,
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  )
+  vapidInitialized = true
+}
 
 export async function POST(request: Request) {
   try {
+    initVapid()
+
     const { title, body, icon, url } = await request.json()
 
     if (!title || !body) {
