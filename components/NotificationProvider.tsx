@@ -10,7 +10,9 @@ export default function NotificationProvider({
   children: React.ReactNode
 }) {
   const { active, dismiss } = useNotifications()
-  const [showPrompt, setShowPrompt] = useState(true)
+  const [showPrompt, setShowPrompt] = useState(
+    () => typeof window !== 'undefined' && localStorage.getItem('meal-plan-push-subscribed') !== 'true'
+  )
   usePushSubscription()
 
   return (

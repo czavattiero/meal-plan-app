@@ -30,7 +30,12 @@ function clearPushSubscriptionFlag() {
 export async function subscribeToPush(): Promise<boolean> {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false
 
-  if (localStorage.getItem(PUSH_SUBSCRIBED_KEY) === 'true') return true
+  if (localStorage.getItem(PUSH_SUBSCRIBED_KEY) === 'true') {
+    const reg = await navigator.serviceWorker.ready
+    const existing = await reg.pushManager.getSubscription()
+    if (existing) return true
+    clearPushSubscriptionFlag()
+  }
 
   if (Notification.permission !== 'granted') {
     clearPushSubscriptionFlag()

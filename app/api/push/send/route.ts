@@ -2,25 +2,31 @@ import { Redis } from '@upstash/redis'
 import webpush from 'web-push'
 import { NextResponse } from 'next/server'
 
+// Initialize Redis client
 const kv = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL!,
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 })
 
-if (
-  process.env.VAPID_EMAIL &&
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY &&
-  process.env.VAPID_PRIVATE_KEY
-) {
+let vapidInitialized = false
+
+function initVapid() {
+  if (vapidInitialized) return
+  if (!process.env.VAPID_EMAIL || !process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+    throw new Error('VAPID environment variables are not configured')
+  }
   webpush.setVapidDetails(
     process.env.VAPID_EMAIL,
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
     process.env.VAPID_PRIVATE_KEY
   )
+  vapidInitialized = true
 }
 
 export async function POST(request: Request) {
   try {
+    initVapid()
+
     const { title, body, icon, url } = await request.json()
 
     if (!title || !body) {
@@ -48,7 +54,7 @@ export async function POST(request: Request) {
         const subStr = await kv.get(`push:${deviceId}`) as string | null
         if (!subStr) {
           await kv.srem('push:all-devices', deviceId)
-          return
+          throw new Error(`No subscription found for device ${deviceId}`)
         }
         const subscription = JSON.parse(subStr)
         await webpush.sendNotification(subscription, payload)
