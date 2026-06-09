@@ -7,17 +7,15 @@ const kv = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 })
 
-if (
-  process.env.VAPID_EMAIL &&
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY &&
-  process.env.VAPID_PRIVATE_KEY
-) {
-  webpush.setVapidDetails(
-    process.env.VAPID_EMAIL,
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY
-  )
+if (!process.env.VAPID_EMAIL || !process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+  throw new Error('VAPID environment variables are not configured')
 }
+
+webpush.setVapidDetails(
+  process.env.VAPID_EMAIL,
+  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+)
 
 export async function POST(request: Request) {
   try {
@@ -48,7 +46,7 @@ export async function POST(request: Request) {
         const subStr = await kv.get(`push:${deviceId}`) as string | null
         if (!subStr) {
           await kv.srem('push:all-devices', deviceId)
-          return
+          throw new Error(`No subscription found for device ${deviceId}`)
         }
         const subscription = JSON.parse(subStr)
         await webpush.sendNotification(subscription, payload)
