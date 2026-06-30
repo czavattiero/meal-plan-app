@@ -111,7 +111,7 @@ export default function HomePage() {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '10px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '10px', marginBottom: '24px' }}>
         {[
           { val: '≤1,600', lbl: 'kcal/day' },
           { val: '15', lbl: 'recipes' },
@@ -133,6 +133,88 @@ export default function HomePage() {
             }}>
               {s.lbl}
             </div>
+          </div>
+        ))}
+      </div>
+
+      {/* GLP-1 Booster */}
+      <div style={{
+        background: '#f0f7f3',
+        border: '0.5px solid #cce4d6',
+        borderRadius: '12px',
+        padding: '16px',
+        marginBottom: '16px',
+      }}>
+        <div style={{
+          fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase',
+          color: '#2d7a4a', fontWeight: 700, marginBottom: '12px',
+        }}>
+          GLP-1 Booster
+        </div>
+        {[
+          {
+            label: 'Protein (strongest trigger)',
+            items: ['Eggs', 'Chicken, beef, pork, fish', 'Greek yogurt & cottage cheese (whey/casein)', 'Chickpeas, beans, lentils, edamame'],
+          },
+          {
+            label: 'Healthy fats',
+            items: ['Avocado (oleic acid)', 'Olive oil', 'Nuts & seeds — almonds, walnuts, flax, chia, pumpkin'],
+          },
+          {
+            label: 'Fiber & prebiotics (fermented into SCFAs)',
+            items: ['All Bran / wheat bran', 'Oats (beta-glucan)', 'Asparagus, broccoli, cauliflower, leafy greens', 'Berries & apples (pectin, polyphenols)', 'Garlic & onion (inulin)'],
+          },
+        ].map(group => (
+          <div key={group.label} style={{ marginBottom: '10px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 600, color: '#1a4a2e', marginBottom: '4px' }}>
+              {group.label}
+            </div>
+            <ul style={{ margin: 0, paddingLeft: '16px', listStyle: 'disc' }}>
+              {group.items.map(item => (
+                <li key={item} style={{ fontSize: '12px', color: '#3d6652', lineHeight: 1.7 }}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      {/* Low-calorie treats */}
+      <div style={{
+        background: '#fffbeb',
+        border: '0.5px solid #f5d67a',
+        borderRadius: '12px',
+        padding: '16px',
+        marginBottom: '16px',
+      }}>
+        <div style={{
+          fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase',
+          color: '#c8900a', fontWeight: 700, marginBottom: '12px',
+        }}>
+          Low-calorie treats
+        </div>
+        {[
+          {
+            label: 'No-effort / grab-and-go',
+            items: ['Meringue cookies (~1–15 cal each)', 'Sugar-free Jello', 'Frozen grapes', 'Ripe pear or apple slices with cinnamon', 'A few squares of dark chocolate'],
+          },
+          {
+            label: '5-minute, no-bake',
+            items: ['Greek yogurt + berries + tiny honey drizzle (~90 cal)', 'Frozen yogurt-coated grapes', 'Berry nice cream (frozen strawberries + Greek yogurt + honey)', 'Protein mousse (frozen strawberries + vanilla protein + Greek yogurt)', 'Chocolate banana coins (banana + melted chocolate + peanuts, frozen)', 'Caramel rice cake + PB2-yogurt spread + strawberries (~100 cal)'],
+          },
+          {
+            label: 'Warm & quick (microwave)',
+            items: ['Chocolate mug cake (almond flour + cocoa + stevia + egg white + almond milk, 90 sec)', 'Single-serve microwave cookie (~78 cal)', 'Warm apple "pie" mug (apple + cinnamon + sweetener, ~83 cal)'],
+          },
+        ].map(group => (
+          <div key={group.label} style={{ marginBottom: '10px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 600, color: '#92600a', marginBottom: '4px' }}>
+              {group.label}
+            </div>
+            <ul style={{ margin: 0, paddingLeft: '16px', listStyle: 'disc' }}>
+              {group.items.map(item => (
+                <li key={item} style={{ fontSize: '12px', color: '#7a5010', lineHeight: 1.7 }}>{item}</li>
+              ))}
+            </ul>
           </div>
         ))}
       </div>
