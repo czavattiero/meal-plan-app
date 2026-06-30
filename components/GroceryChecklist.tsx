@@ -1,6 +1,7 @@
 'use client'
 import { GroceryItem } from '@/types'
 import { useChecklist } from '@/hooks/useChecklist'
+import SyncToast from '@/components/SyncToast'
 
 type Props = {
   week: number
@@ -18,7 +19,7 @@ const CATEGORY_LABELS: Record<GroceryItem['category'], string> = {
 }
 
 export default function GroceryChecklist({ week, items }: Props) {
-  const { toggle, isChecked, checkedCount, reset } = useChecklist(week)
+  const { toggle, isChecked, checkedCount, reset, toast } = useChecklist(week)
 
   const grouped = items.reduce<Record<string, GroceryItem[]>>((acc, item) => {
     if (!acc[item.category]) acc[item.category] = []
@@ -31,6 +32,7 @@ export default function GroceryChecklist({ week, items }: Props) {
 
   return (
     <div>
+      {toast && <SyncToast message={toast.message} type={toast.type} />}
       <div style={{
         display: 'flex',
         alignItems: 'center',
