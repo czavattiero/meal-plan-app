@@ -4,12 +4,8 @@ import { NotificationRule } from '@/types'
 import { getSavedRules, saveRules, getNotificationsDue } from '@/lib/notifications'
 
 export function useNotifications() {
-  const [rules, setRules] = useState<NotificationRule[]>([])
+  const [rules, setRules] = useState<NotificationRule[]>(() => getSavedRules())
   const [active, setActive] = useState<NotificationRule[]>([])
-
-  useEffect(() => {
-    setRules(getSavedRules())
-  }, [])
 
   const dismiss = useCallback((id: string) => {
     setActive(prev => prev.filter(n => n.id !== id))
@@ -25,9 +21,13 @@ export function useNotifications() {
   }, [rules, dismiss])
 
   useEffect(() => {
-    check()
+    const initialCheck = window.setTimeout(check, 0)
     const interval = setInterval(check, 60000)
-    return () => clearInterval(interval)
+
+    return () => {
+      window.clearTimeout(initialCheck)
+      clearInterval(interval)
+    }
   }, [check])
 
   const toggleRule = (id: string) => {

@@ -1,12 +1,6 @@
-import { Redis } from '@upstash/redis'
 import webpush from 'web-push'
 import { NextResponse } from 'next/server'
-
-// Initialize Redis client
-const kv = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-})
+import { getRedis } from '@/lib/redis'
 
 let vapidInitialized = false
 
@@ -25,6 +19,15 @@ function initVapid() {
 
 export async function POST(request: Request) {
   try {
+    const kv = getRedis()
+
+    if (!kv) {
+      return NextResponse.json(
+        { error: 'Push notifications are not configured' },
+        { status: 503 }
+      )
+    }
+
     initVapid()
 
     const { title, body, icon, url } = await request.json()

@@ -87,7 +87,7 @@ export default function SettingsPage() {
       }}>
         <strong>About push notifications:</strong> To receive notifications when
         the app is closed, open the app in Safari on iPhone, tap the Share button,
-        and select "Add to Home Screen". Then reopen the app from your home screen
+        and select &quot;Add to Home Screen&quot;. Then reopen the app from your home screen
         — you will be asked to allow notifications.
       </div>
     </div>

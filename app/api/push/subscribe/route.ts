@@ -1,13 +1,17 @@
-import { Redis } from '@upstash/redis'
 import { NextResponse } from 'next/server'
-
-const kv = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-})
+import { getRedis } from '@/lib/redis'
 
 export async function POST(request: Request) {
   try {
+    const kv = getRedis()
+
+    if (!kv) {
+      return NextResponse.json(
+        { error: 'Push subscriptions are not configured' },
+        { status: 503 }
+      )
+    }
+
     const { subscription, deviceId } = await request.json()
 
     if (!subscription || !deviceId) {

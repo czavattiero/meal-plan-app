@@ -18,7 +18,7 @@ const CATEGORY_LABELS: Record<GroceryItem['category'], string> = {
 }
 
 export default function GroceryChecklist({ week, items }: Props) {
-  const { toggle, isChecked, checkedCount, reset } = useChecklist(week)
+  const { toggle, isChecked, checkedCount, reset, isShared } = useChecklist(week)
 
   const grouped = items.reduce<Record<string, GroceryItem[]>>((acc, item) => {
     if (!acc[item.category]) acc[item.category] = []
@@ -47,6 +47,11 @@ export default function GroceryChecklist({ week, items }: Props) {
           </div>
           <div style={{ fontSize: '11px', color: '#5a7a68', marginTop: '2px' }}>
             {total - checkedCount} remaining
+          </div>
+          <div style={{ fontSize: '10px', color: '#5a7a68', marginTop: '4px' }}>
+            {isShared
+              ? 'Shared checklist syncs across devices every few seconds.'
+              : 'Checklist is saved on this device until shared sync is configured.'}
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

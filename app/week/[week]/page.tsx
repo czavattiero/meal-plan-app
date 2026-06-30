@@ -113,7 +113,7 @@ export default async function WeekPage({ params }: Props) {
         <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#1a4a2e', marginBottom: '12px' }}>
           Week {weekNum} Grocery List
         </h2>
-        <GroceryChecklist week={weekNum} items={weekData.groceryList} />
+        <GroceryChecklist key={weekNum} week={weekNum} items={weekData.groceryList} />
       </div>
     </div>
   )
