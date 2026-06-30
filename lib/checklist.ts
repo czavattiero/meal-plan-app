@@ -1,4 +1,5 @@
 import { ChecklistState } from '@/types'
+import { supabase } from '@/lib/supabase'
 
 const KEY_PREFIX = 'meal-plan-checklist-week-'
 
@@ -32,4 +33,36 @@ export function getUncheckedCount(week: number, totalItems: number): number {
   const state = getChecklist(week)
   const checkedCount = Object.values(state).filter(Boolean).length
   return totalItems - checkedCount
+}
+
+export function stateHash(state: ChecklistState): string {
+  const json = JSON.stringify(state, Object.keys(state).sort())
+  return `${json.length}:${json.slice(0, 50)}`
+}
+
+export async function loadChecklistFromSupabase(week: number): Promise<ChecklistState | null> {
+  if (!supabase) return null
+  try {
+    const { data, error } = await supabase
+      .from('checklist_state')
+      .select('state')
+      .eq('week', week)
+      .single()
+    if (error || !data) return null
+    return data.state as ChecklistState
+  } catch {
+    return null
+  }
+}
+
+export async function saveChecklistToSupabase(week: number, state: ChecklistState): Promise<boolean> {
+  if (!supabase) return false
+  try {
+    const { error } = await supabase
+      .from('checklist_state')
+      .upsert({ week, state, updated_at: new Date().toISOString() }, { onConflict: 'week' })
+    return !error
+  } catch {
+    return false
+  }
 }
