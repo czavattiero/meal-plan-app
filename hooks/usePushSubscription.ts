@@ -28,7 +28,7 @@ function clearPushSubscriptionFlag() {
 }
 
 export async function subscribeToPush(): Promise<boolean> {
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false
+  if (!('serviceWorker' in navigator) || !('PushManager' in window) || typeof Notification === 'undefined') return false
 
   if (localStorage.getItem(PUSH_SUBSCRIBED_KEY) === 'true') {
     const reg = await navigator.serviceWorker.ready
@@ -84,7 +84,7 @@ export async function subscribeToPush(): Promise<boolean> {
 
 export function usePushSubscription() {
   useEffect(() => {
-    if (Notification.permission === 'denied') {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
       clearPushSubscriptionFlag()
     }
 
