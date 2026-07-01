@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNotifications } from '@/hooks/useNotifications'
 import { subscribeToPush, usePushSubscription } from '@/hooks/usePushSubscription'
 import NotificationBanner from './NotificationBanner'
@@ -10,10 +10,13 @@ export default function NotificationProvider({
   children: React.ReactNode
 }) {
   const { active, dismiss } = useNotifications()
-  const [showPrompt, setShowPrompt] = useState(
-    () => typeof window !== 'undefined' && localStorage.getItem('meal-plan-push-subscribed') !== 'true'
-  )
+  const [showPrompt, setShowPrompt] = useState(false)
   usePushSubscription()
+
+  useEffect(() => {
+    if (typeof Notification === 'undefined') return
+    setShowPrompt(localStorage.getItem('meal-plan-push-subscribed') !== 'true')
+  }, [])
 
   return (
     <>
