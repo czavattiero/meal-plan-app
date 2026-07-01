@@ -1,10 +1,5 @@
-import { Redis } from '@upstash/redis'
 import { NextResponse } from 'next/server'
-
-const kv = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-})
+import { createServerClient } from '@/lib/supabase'
 
 export async function POST(request: Request) {
   try {
@@ -17,13 +12,21 @@ export async function POST(request: Request) {
       )
     }
 
-    await kv.set(
-      `push:${deviceId}`,
-      JSON.stringify(subscription),
-      { ex: 60 * 60 * 24 * 90 }
-    )
+    const db = createServerClient()
 
-    await kv.sadd('push:all-devices', deviceId)
+    const { error } = await db
+      .from('push_subscriptions')
+      .upsert(
+        {
+          device_id: deviceId,
+          subscription,
+          updated_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+        },
+        { onConflict: 'device_id' }
+      )
+
+    if (error) throw error
 
     return NextResponse.json({ success: true })
   } catch (error) {
