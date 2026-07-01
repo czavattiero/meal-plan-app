@@ -1,12 +1,6 @@
-import { Redis } from '@upstash/redis'
 import webpush from 'web-push'
 import { NextResponse } from 'next/server'
-
-// Initialize Redis client
-const kv = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-})
+import { createServerClient } from '@/lib/supabase'
 
 let vapidInitialized = false
 
@@ -36,9 +30,15 @@ export async function POST(request: Request) {
       )
     }
 
-    const deviceIds = await kv.smembers('push:all-devices') as string[]
+    const db = createServerClient()
 
-    if (deviceIds.length === 0) {
+    const { data: rows, error: fetchError } = await db
+      .from('push_subscriptions')
+      .select('device_id, subscription')
+
+    if (fetchError) throw fetchError
+
+    if (!rows || rows.length === 0) {
       return NextResponse.json({ sent: 0, total: 0, message: 'No subscribers yet' })
     }
 
@@ -50,21 +50,21 @@ export async function POST(request: Request) {
     })
 
     const results = await Promise.allSettled(
-      deviceIds.map(async (deviceId) => {
-        const subStr = await kv.get(`push:${deviceId}`) as string | null
-        if (!subStr) {
-          await kv.srem('push:all-devices', deviceId)
-          throw new Error(`No subscription found for device ${deviceId}`)
+      rows.map(async ({ device_id, subscription }) => {
+        try {
+          await webpush.sendNotification(subscription, payload)
+        } catch (err) {
+          // Remove stale subscriptions (e.g. 410 Gone)
+          await db.from('push_subscriptions').delete().eq('device_id', device_id)
+          throw err
         }
-        const subscription = JSON.parse(subStr)
-        await webpush.sendNotification(subscription, payload)
       })
     )
 
     const sent = results.filter(r => r.status === 'fulfilled').length
     const failed = results.filter(r => r.status === 'rejected').length
 
-    return NextResponse.json({ sent, failed, total: deviceIds.length })
+    return NextResponse.json({ sent, failed, total: rows.length })
   } catch (error) {
     console.error('Send notification error:', error)
     return NextResponse.json(
