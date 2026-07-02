@@ -1,8 +1,10 @@
 {
   "crons": [
-    {
-      "path": "/api/push/cron",
-      "schedule": "0 8 * * *"
-    }
+    { "path": "/api/push/cron", "schedule": "0 8 * * *" },
+    { "path": "/api/push/cron", "schedule": "0 9 * * *" },
+    { "path": "/api/push/cron", "schedule": "0 12 * * *" },
+    { "path": "/api/push/cron", "schedule": "30 12 * * *" },
+    { "path": "/api/push/cron", "schedule": "0 14 * * *" },
+    { "path": "/api/push/cron", "schedule": "30 17 * * *" }
   ]
 }

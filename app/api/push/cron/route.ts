@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
 import { DEFAULT_RULES } from '@/lib/notifications'
+import { sendPush } from '@/lib/sendPush'
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization')
   if (
     process.env.CRON_SECRET &&
-    authHeader !== `Bearer ${process.env.CRON_SECRET}`
+    authHeader !== 'Bearer ' + process.env.CRON_SECRET
   ) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -27,16 +28,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ sent: 0, message: 'No notifications due' })
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? `https://${request.headers.get('host')}`
-
   const results = await Promise.allSettled(
-    due.map(rule =>
-      fetch(`${baseUrl}/api/push/send`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: rule.title, body: rule.body, icon: rule.icon }),
-      })
-    )
+    due.map(rule => sendPush({ title: rule.title, body: rule.body, icon: rule.icon }))
   )
 
   const succeeded = results.filter(r => r.status === 'fulfilled').length
