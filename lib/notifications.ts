@@ -113,11 +113,11 @@ export const DEFAULT_RULES: NotificationRule[] = [
 ]
 
 function isValidHour(value: unknown): value is number {
-  return Number.isInteger(value) && value >= 0 && value <= 23
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 23
 }
 
 function isValidMinute(value: unknown): value is number {
-  return Number.isInteger(value) && value >= 0 && value <= 59
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 59
 }
 
 export function extractRulePreferences(

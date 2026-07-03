@@ -12,8 +12,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { hour, minute, dayOfWeek } = getNotificationScheduleParts()
   const now = new Date()
+  const { hour, minute, dayOfWeek } = getNotificationScheduleParts(now)
   const db = createServerClient()
   const { data: subscriptions, error } = await db
     .from('push_subscriptions')

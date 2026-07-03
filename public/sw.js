@@ -3,8 +3,16 @@ self.addEventListener('push', function (event) {
 
   const data = event.data.json()
   const title = data.title || 'Meal Plan'
-  const url = data.url || '/'
-  const resolvedUrl = new URL(url, self.location.origin).toString()
+  let resolvedUrl = self.location.origin
+
+  if (data.url) {
+    try {
+      resolvedUrl = new URL(data.url, self.location.origin).toString()
+    } catch {
+      resolvedUrl = self.location.origin
+    }
+  }
+
   const body = data.url ? `${data.body}\n${resolvedUrl}` : data.body
   const options = {
     body,
