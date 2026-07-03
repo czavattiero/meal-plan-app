@@ -11,22 +11,36 @@ export default function NotificationProvider({
 }) {
   const { active, dismiss } = useNotifications()
   const [showPrompt, setShowPrompt] = useState(false)
-  usePushSubscription()
+  const pushSupport = usePushSubscription()
 
   useEffect(() => {
-    if (typeof Notification === 'undefined') return
+    if (typeof Notification === 'undefined' || !pushSupport?.canSubscribe) return
 
     const frameId = window.requestAnimationFrame(() => {
       setShowPrompt(localStorage.getItem('meal-plan-push-subscribed') !== 'true')
     })
 
     return () => window.cancelAnimationFrame(frameId)
-  }, [])
+  }, [pushSupport])
 
   return (
     <>
       <NotificationBanner notifications={active} onDismiss={dismiss} />
-      {showPrompt && (
+      {pushSupport?.message && pushSupport.reason !== 'supported' && (
+        <div style={{
+          background: '#f8f3e6',
+          color: '#5e4300',
+          padding: '12px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          fontSize: '13px',
+          lineHeight: 1.5,
+        }}>
+          <span>{pushSupport.message}</span>
+        </div>
+      )}
+      {showPrompt && pushSupport?.canSubscribe && (
         <div style={{
           background: '#1a4a2e',
           color: '#fff',
