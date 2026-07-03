@@ -20,7 +20,9 @@ export interface PushPayload {
   title: string
   body: string
   icon?: string
+  image?: string
   url?: string
+  videoUrl?: string
   deviceId?: string
 }
 
@@ -53,7 +55,9 @@ export async function sendPush(payload: PushPayload): Promise<PushResult> {
     title: payload.title,
     body: payload.body,
     icon: payload.icon ?? '/icon-192.png',
+    image: payload.image,
     url: payload.url ?? '/',
+    videoUrl: payload.videoUrl,
   })
 
   const results = await Promise.allSettled(
