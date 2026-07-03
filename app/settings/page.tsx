@@ -2,6 +2,22 @@
 import { useNotifications } from '@/hooks/useNotifications'
 import { FormEvent, useState } from 'react'
 
+type PushAttemptResult = {
+  deviceId: string
+  ok: boolean
+  statusCode?: number
+  error?: string
+  deleted?: boolean
+}
+
+type SendPayload = {
+  error?: string
+  sent?: number
+  failed?: number
+  total?: number
+  attempts?: PushAttemptResult[]
+}
+
 export default function SettingsPage() {
   const { rules, toggleRule, updateTime } = useNotifications()
   const [title, setTitle] = useState('Test')
@@ -11,7 +27,16 @@ export default function SettingsPage() {
   const [sendResult, setSendResult] = useState<{
     type: 'success' | 'error'
     message: string
+    details?: string[]
   } | null>(null)
+
+  const formatAttempt = (attempt: PushAttemptResult) => {
+    if (attempt.ok) return `Delivered to ${attempt.deviceId}.`
+
+    const status = attempt.statusCode ? ` (${attempt.statusCode})` : ''
+    const removed = attempt.deleted ? ' Subscription was removed.' : ''
+    return `Failed on ${attempt.deviceId}${status}: ${attempt.error ?? 'Unknown error.'}${removed}`
+  }
 
   const sendNotification = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -46,9 +71,7 @@ export default function SettingsPage() {
           url: cleanTargetUrl,
         }),
       })
-      const payload = (await response.json().catch(() => null)) as
-        | { error?: string; sent?: number; total?: number }
-        | null
+      const payload = (await response.json().catch(() => null)) as SendPayload | null
 
       if (!response.ok) {
         setSendResult({
@@ -68,7 +91,11 @@ export default function SettingsPage() {
 
       setSendResult({
         type: 'success',
-        message: `Notification sent to ${payload?.sent ?? 0} device(s).`,
+        message:
+          (payload?.failed ?? 0) > 0
+            ? `Notification sent to ${payload?.sent ?? 0} of ${payload?.total ?? 0} device(s).`
+            : `Notification sent to ${payload?.sent ?? 0} device(s).`,
+        details: payload?.attempts?.map(formatAttempt),
       })
     } catch {
       setSendResult({
@@ -272,8 +299,15 @@ export default function SettingsPage() {
               lineHeight: 1.5,
             }}
           >
-            {sendResult.message}
-          </div>
+             <div>{sendResult.message}</div>
+             {sendResult.details && sendResult.details.length > 0 && (
+               <ul style={{ margin: '8px 0 0', paddingLeft: '18px' }}>
+                 {sendResult.details.map(detail => (
+                   <li key={detail}>{detail}</li>
+                 ))}
+               </ul>
+             )}
+           </div>
         )}
       </form>
 
