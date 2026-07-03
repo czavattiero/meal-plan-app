@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
     if (error) throw error
 
-    return NextResponse.json({ success: true, synced: data.length > 0 })
+    return NextResponse.json({ success: true, synced: (data?.length ?? 0) > 0 })
   } catch (error) {
     console.error('Preference sync error:', error)
     return NextResponse.json(

@@ -31,7 +31,12 @@ export async function POST(request: Request) {
       .upsert(subscriptionPayload, { onConflict: 'device_id' })
 
     if (error && isMissingNotificationRulesColumnError(error)) {
-      const { notification_rules: _, ...legacyPayload } = subscriptionPayload
+      const legacyPayload = {
+        device_id: subscriptionPayload.device_id,
+        subscription: subscriptionPayload.subscription,
+        updated_at: subscriptionPayload.updated_at,
+        expires_at: subscriptionPayload.expires_at,
+      }
       ;({ error } = await db
         .from('push_subscriptions')
         .upsert(legacyPayload, { onConflict: 'device_id' }))
