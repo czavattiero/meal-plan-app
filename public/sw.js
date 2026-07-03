@@ -6,8 +6,7 @@ self.addEventListener('push', function (event) {
   const options = {
     body: data.body,
     icon: data.icon || '/icon-192.png',
-    image: data.image,
-    data: { url: data.url || '/', videoUrl: data.videoUrl },
+    data: { url: data.url || '/' },
   }
 
   event.waitUntil(self.registration.showNotification(title, options))
@@ -15,7 +14,7 @@ self.addEventListener('push', function (event) {
 
 self.addEventListener('notificationclick', function (event) {
   event.notification.close()
-  const url = event.notification.data?.videoUrl || event.notification.data?.url || '/'
+  const url = event.notification.data?.url || '/'
 
   event.waitUntil(
     clients.matchAll({ type: 'window' }).then(function (clientList) {

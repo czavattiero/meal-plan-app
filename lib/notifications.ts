@@ -2,6 +2,42 @@ import { NotificationRule } from '@/types'
 
 const PREFS_KEY = 'meal-plan-notification-prefs'
 const FIRED_KEY = 'meal-plan-notifications-fired'
+const NOTIFICATION_TIME_ZONE = 'America/Edmonton'
+const WEEKDAY_INDEX: Record<string, number> = {
+  Sun: 0,
+  Mon: 1,
+  Tue: 2,
+  Wed: 3,
+  Thu: 4,
+  Fri: 5,
+  Sat: 6,
+}
+
+export function getNotificationScheduleParts(date = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: NOTIFICATION_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    weekday: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(date)
+
+  const values = Object.fromEntries(
+    parts
+      .filter(part => part.type !== 'literal')
+      .map(part => [part.type, part.value])
+  ) as Record<string, string>
+
+  return {
+    dayOfWeek: WEEKDAY_INDEX[values.weekday] ?? 0,
+    hour: Number(values.hour),
+    minute: Number(values.minute),
+    dateKey: `${values.year}-${values.month}-${values.day}`,
+  }
+}
 
 export const DEFAULT_RULES: NotificationRule[] = [
   {
@@ -95,10 +131,7 @@ export function saveRules(rules: NotificationRule[]): void {
 }
 
 export function getNotificationsDue(rules: NotificationRule[]): NotificationRule[] {
-  const now = new Date()
-  const h = now.getHours()
-  const m = now.getMinutes()
-  const d = now.getDay()
+  const { dayOfWeek, hour, minute, dateKey } = getNotificationScheduleParts()
 
   let fired: Record<string, string> = {}
   try {
@@ -107,9 +140,9 @@ export function getNotificationsDue(rules: NotificationRule[]): NotificationRule
 
   const due = rules.filter(rule => {
     if (!rule.enabled) return false
-    if (!rule.daysOfWeek.includes(d)) return false
-    if (rule.triggerHour !== h || rule.triggerMinute !== m) return false
-    const todayKey = `${now.toDateString()}-${h}:${m}`
+    if (!rule.daysOfWeek.includes(dayOfWeek)) return false
+    if (rule.triggerHour !== hour || rule.triggerMinute !== minute) return false
+    const todayKey = `${dateKey}-${hour}:${minute}`
     if (fired[rule.id] === todayKey) return false
     fired[rule.id] = todayKey
     return true
