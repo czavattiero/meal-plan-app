@@ -40,6 +40,29 @@ function clearPushSubscriptionFlag() {
   localStorage.removeItem(PUSH_SUBSCRIBED_KEY)
 }
 
+async function saveSubscription(
+  subscription: PushSubscription,
+  deviceId: string
+): Promise<boolean> {
+  const res = await fetch('/api/push/subscribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      subscription,
+      deviceId,
+      rules: getSavedRules(),
+    }),
+  })
+
+  if (!res.ok) {
+    clearPushSubscriptionFlag()
+    return false
+  }
+
+  localStorage.setItem(PUSH_SUBSCRIBED_KEY, 'true')
+  return true
+}
+
 function parseIOSVersion(userAgent: string): { major: number; minor: number } | null {
   const match = userAgent.match(/OS (\d+)[._](\d+)/)
   if (!match) return null
@@ -125,13 +148,6 @@ export async function subscribeToPush(): Promise<boolean> {
     return false
   }
 
-  if (localStorage.getItem(PUSH_SUBSCRIBED_KEY) === 'true') {
-    const reg = await navigator.serviceWorker.ready
-    const existing = await reg.pushManager.getSubscription()
-    if (existing) return true
-    clearPushSubscriptionFlag()
-  }
-
   if (Notification.permission !== 'granted') {
     clearPushSubscriptionFlag()
     return false
@@ -157,23 +173,7 @@ export async function subscribeToPush(): Promise<boolean> {
       }))
 
     const deviceId = getOrCreateDeviceId()
-    const res = await fetch('/api/push/subscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        subscription,
-        deviceId,
-        rules: getSavedRules(),
-      }),
-    })
-
-    if (!res.ok) {
-      clearPushSubscriptionFlag()
-      return false
-    }
-
-    localStorage.setItem(PUSH_SUBSCRIBED_KEY, 'true')
-    return true
+    return saveSubscription(subscription, deviceId)
   } catch (err) {
     clearPushSubscriptionFlag()
     console.error('Push subscription failed:', err)
