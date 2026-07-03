@@ -61,7 +61,13 @@ export async function sendPush(payload: PushPayload): Promise<PushResult> {
       try {
         await webpush.sendNotification(subscription, jsonPayload)
       } catch (err) {
-        await db.from('push_subscriptions').delete().eq('device_id', device_id)
+        // Only remove the subscription when the push service confirms it is
+        // gone (410) or not found (404).  Transient errors (network issues,
+        // rate limits, 5xx) must not delete a valid subscription.
+        const statusCode = (err as { statusCode?: number }).statusCode
+        if (statusCode === 410 || statusCode === 404) {
+          await db.from('push_subscriptions').delete().eq('device_id', device_id)
+        }
         throw err
       }
     })
