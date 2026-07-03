@@ -53,7 +53,7 @@ export async function sendPush(payload: PushPayload): Promise<PushResult> {
     title: payload.title,
     body: payload.body,
     icon: payload.icon ?? '/icon-192.png',
-    url: payload.url ?? '/',
+    ...(payload.url && { url: payload.url }),
   })
 
   const results = await Promise.allSettled(
