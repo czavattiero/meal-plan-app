@@ -6,6 +6,10 @@ export default function SettingsPage() {
   const { rules, toggleRule, updateTime } = useNotifications()
   const [title, setTitle] = useState('Test')
   const [body, setBody] = useState('Have fun!')
+  const [targetUrl, setTargetUrl] = useState('')
+  const [iconUrl, setIconUrl] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
+  const [videoUrl, setVideoUrl] = useState('')
   const [sending, setSending] = useState(false)
   const [sendResult, setSendResult] = useState<{
     type: 'success' | 'error'
@@ -17,6 +21,10 @@ export default function SettingsPage() {
 
     const cleanTitle = title.trim()
     const cleanBody = body.trim()
+    const cleanTargetUrl = targetUrl.trim() || undefined
+    const cleanIconUrl = iconUrl.trim() || undefined
+    const cleanImageUrl = imageUrl.trim() || undefined
+    const cleanVideoUrl = videoUrl.trim() || undefined
 
     if (!cleanTitle || !cleanBody) {
       setSendResult({ type: 'error', message: 'Title and body are required.' })
@@ -41,6 +49,10 @@ export default function SettingsPage() {
         body: JSON.stringify({
           title: cleanTitle,
           body: cleanBody,
+          url: cleanTargetUrl,
+          icon: cleanIconUrl,
+          image: cleanImageUrl,
+          videoUrl: cleanVideoUrl,
         }),
       })
       const payload = (await response.json().catch(() => null)) as
@@ -201,6 +213,89 @@ export default function SettingsPage() {
             color: '#1a4a2e',
           }}
         />
+        <div
+          style={{
+            border: '0.5px solid #cce4d6',
+            borderRadius: '8px',
+            padding: '10px',
+            background: '#f7fbf8',
+          }}
+        >
+          <div
+            style={{
+              fontSize: '11px',
+              fontWeight: 700,
+              color: '#1a4a2e',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              marginBottom: '8px',
+            }}
+          >
+            Rich content (optional)
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <input
+              type="url"
+              value={targetUrl}
+              onChange={e => setTargetUrl(e.target.value)}
+              placeholder="Open URL when tapped (https://...)"
+              disabled={sending}
+              style={{
+                fontSize: '13px',
+                border: '0.5px solid #cce4d6',
+                borderRadius: '6px',
+                padding: '8px 10px',
+                background: '#fff',
+                color: '#1a4a2e',
+              }}
+            />
+            <input
+              type="url"
+              value={iconUrl}
+              onChange={e => setIconUrl(e.target.value)}
+              placeholder="Icon PNG URL (https://...png)"
+              disabled={sending}
+              style={{
+                fontSize: '13px',
+                border: '0.5px solid #cce4d6',
+                borderRadius: '6px',
+                padding: '8px 10px',
+                background: '#fff',
+                color: '#1a4a2e',
+              }}
+            />
+            <input
+              type="url"
+              value={imageUrl}
+              onChange={e => setImageUrl(e.target.value)}
+              placeholder="Image PNG URL (https://...png)"
+              disabled={sending}
+              style={{
+                fontSize: '13px',
+                border: '0.5px solid #cce4d6',
+                borderRadius: '6px',
+                padding: '8px 10px',
+                background: '#fff',
+                color: '#1a4a2e',
+              }}
+            />
+            <input
+              type="url"
+              value={videoUrl}
+              onChange={e => setVideoUrl(e.target.value)}
+              placeholder="Video URL (opens when tapped, if provided)"
+              disabled={sending}
+              style={{
+                fontSize: '13px',
+                border: '0.5px solid #cce4d6',
+                borderRadius: '6px',
+                padding: '8px 10px',
+                background: '#fff',
+                color: '#1a4a2e',
+              }}
+            />
+          </div>
+        </div>
         <button
           type="submit"
           disabled={sending}
