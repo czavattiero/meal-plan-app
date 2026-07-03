@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
-import { DEFAULT_RULES, getNotificationScheduleParts } from '@/lib/notifications'
+import { getDueRules, getNotificationScheduleParts, mergeRulePreferences } from '@/lib/notifications'
 import { sendPush } from '@/lib/sendPush'
+import { createServerClient } from '@/lib/supabase'
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization')
@@ -11,26 +12,67 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { hour, minute, dayOfWeek } = getNotificationScheduleParts()
+  const now = new Date()
+  const { hour, minute, dayOfWeek } = getNotificationScheduleParts(now)
+  const db = createServerClient()
+  const { data: subscriptions, error } = await db
+    .from('push_subscriptions')
+    .select('device_id, notification_rules')
 
-  const due = DEFAULT_RULES.filter(
-    rule =>
-      rule.enabled &&
-      rule.daysOfWeek.includes(dayOfWeek) &&
-      rule.triggerHour === hour &&
-      rule.triggerMinute === minute
+  if (error) {
+    console.error('Cron subscription fetch error:', error)
+    return NextResponse.json(
+      { error: 'Failed to load subscriptions' },
+      { status: 500 }
+    )
+  }
+
+  const dueNotifications = (subscriptions ?? []).flatMap(subscription =>
+    getDueRules(mergeRulePreferences(subscription.notification_rules), now).map(
+      rule => ({
+        deviceId: subscription.device_id,
+        rule,
+      })
+    )
   )
 
-  if (due.length === 0) {
-    return NextResponse.json({ sent: 0, message: 'No notifications due' })
+  if (dueNotifications.length === 0) {
+    return NextResponse.json({
+      sent: 0,
+      total: 0,
+      hour,
+      minute,
+      dayOfWeek,
+      message: 'No notifications due',
+    })
   }
 
   const results = await Promise.allSettled(
-    due.map(rule => sendPush({ title: rule.title, body: rule.body, icon: rule.icon }))
+    dueNotifications.map(({ deviceId, rule }) =>
+      sendPush({
+        title: rule.title,
+        body: rule.body,
+        icon: rule.icon,
+        deviceId,
+      })
+    )
   )
 
-  const succeeded = results.filter(r => r.status === 'fulfilled').length
-  const failed = results.filter(r => r.status === 'rejected').length
+  const sent = results.reduce((count, result) => {
+    if (result.status !== 'fulfilled') return count
+    return count + result.value.sent
+  }, 0)
+  const failed = results.reduce((count, result) => {
+    if (result.status === 'fulfilled') return count + result.value.failed
+    return count + 1
+  }, 0)
 
-  return NextResponse.json({ sent: succeeded, failed, total: due.length })
+  return NextResponse.json({
+    sent,
+    failed,
+    total: dueNotifications.length,
+    hour,
+    minute,
+    dayOfWeek,
+  })
 }

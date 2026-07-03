@@ -1,13 +1,20 @@
 'use client'
 import { useEffect } from 'react'
+import { NotificationRule } from '@/types'
+import { getSavedRules } from '@/lib/notifications'
 
 const PUSH_SUBSCRIBED_KEY = 'meal-plan-push-subscribed'
+const DEVICE_ID_KEY = 'meal-plan-device-id'
+
+export function getStoredDeviceId(): string | null {
+  return localStorage.getItem(DEVICE_ID_KEY)
+}
 
 function getOrCreateDeviceId(): string {
-  let id = localStorage.getItem('meal-plan-device-id')
+  let id = getStoredDeviceId()
   if (!id) {
     id = crypto.randomUUID()
-    localStorage.setItem('meal-plan-device-id', id)
+    localStorage.setItem(DEVICE_ID_KEY, id)
   }
   return id
 }
@@ -65,7 +72,11 @@ export async function subscribeToPush(): Promise<boolean> {
     const res = await fetch('/api/push/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subscription, deviceId }),
+      body: JSON.stringify({
+        subscription,
+        deviceId,
+        rules: getSavedRules(),
+      }),
     })
 
     if (!res.ok) {
@@ -78,6 +89,28 @@ export async function subscribeToPush(): Promise<boolean> {
   } catch (err) {
     clearPushSubscriptionFlag()
     console.error('Push subscription failed:', err)
+    return false
+  }
+}
+
+export async function syncNotificationRules(
+  rules: NotificationRule[]
+): Promise<boolean> {
+  if (localStorage.getItem(PUSH_SUBSCRIBED_KEY) !== 'true') return false
+
+  const deviceId = getStoredDeviceId()
+  if (!deviceId) return false
+
+  try {
+    const response = await fetch('/api/push/preferences', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ deviceId, rules }),
+    })
+
+    return response.ok
+  } catch (error) {
+    console.error('Notification rule sync failed:', error)
     return false
   }
 }

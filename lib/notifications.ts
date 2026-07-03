@@ -13,6 +13,16 @@ const WEEKDAY_INDEX: Record<string, number> = {
   Sat: 6,
 }
 
+type NotificationRulePreference = Pick<
+  NotificationRule,
+  'enabled' | 'triggerHour' | 'triggerMinute'
+>
+
+export type NotificationRulePreferences = Record<
+  string,
+  Partial<NotificationRulePreference>
+>
+
 export function getNotificationScheduleParts(date = new Date()) {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: NOTIFICATION_TIME_ZONE,
@@ -102,16 +112,74 @@ export const DEFAULT_RULES: NotificationRule[] = [
   },
 ]
 
+function isValidHour(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 23
+}
+
+function isValidMinute(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 59
+}
+
+export function extractRulePreferences(
+  rules: NotificationRule[]
+): NotificationRulePreferences {
+  const prefs: NotificationRulePreferences = {}
+
+  rules.forEach(rule => {
+    prefs[rule.id] = {
+      enabled: rule.enabled,
+      triggerHour: rule.triggerHour,
+      triggerMinute: rule.triggerMinute,
+    }
+  })
+
+  return prefs
+}
+
+export function mergeRulePreferences(
+  preferences?: unknown
+): NotificationRule[] {
+  const prefs =
+    preferences && typeof preferences === 'object'
+      ? (preferences as NotificationRulePreferences)
+      : {}
+
+  return DEFAULT_RULES.map(rule => {
+    const pref = prefs[rule.id]
+
+    return {
+      ...rule,
+      enabled:
+        typeof pref?.enabled === 'boolean' ? pref.enabled : rule.enabled,
+      triggerHour: isValidHour(pref?.triggerHour)
+        ? pref.triggerHour
+        : rule.triggerHour,
+      triggerMinute: isValidMinute(pref?.triggerMinute)
+        ? pref.triggerMinute
+        : rule.triggerMinute,
+    }
+  })
+}
+
+export function getDueRules(
+  rules: NotificationRule[],
+  date = new Date()
+): NotificationRule[] {
+  const { dayOfWeek, hour, minute } = getNotificationScheduleParts(date)
+
+  return rules.filter(rule => {
+    if (!rule.enabled) return false
+    if (!rule.daysOfWeek.includes(dayOfWeek)) return false
+    return rule.triggerHour === hour && rule.triggerMinute === minute
+  })
+}
+
 export function getSavedRules(): NotificationRule[] {
   if (typeof window === 'undefined') return DEFAULT_RULES
   try {
     const saved = localStorage.getItem(PREFS_KEY)
     if (!saved) return DEFAULT_RULES
-    const prefs = JSON.parse(saved) as Record<string, Partial<NotificationRule>>
-    return DEFAULT_RULES.map(rule => ({
-      ...rule,
-      ...(prefs[rule.id] ?? {}),
-    }))
+    return mergeRulePreferences(JSON.parse(saved))
   } catch {
     return DEFAULT_RULES
   }
@@ -119,15 +187,7 @@ export function getSavedRules(): NotificationRule[] {
 
 export function saveRules(rules: NotificationRule[]): void {
   if (typeof window === 'undefined') return
-  const prefs: Record<string, Partial<NotificationRule>> = {}
-  rules.forEach(r => {
-    prefs[r.id] = {
-      enabled: r.enabled,
-      triggerHour: r.triggerHour,
-      triggerMinute: r.triggerMinute,
-    }
-  })
-  localStorage.setItem(PREFS_KEY, JSON.stringify(prefs))
+  localStorage.setItem(PREFS_KEY, JSON.stringify(extractRulePreferences(rules)))
 }
 
 export function getNotificationsDue(rules: NotificationRule[]): NotificationRule[] {

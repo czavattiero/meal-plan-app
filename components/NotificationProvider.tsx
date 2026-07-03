@@ -15,7 +15,12 @@ export default function NotificationProvider({
 
   useEffect(() => {
     if (typeof Notification === 'undefined') return
-    setShowPrompt(localStorage.getItem('meal-plan-push-subscribed') !== 'true')
+
+    const frameId = window.requestAnimationFrame(() => {
+      setShowPrompt(localStorage.getItem('meal-plan-push-subscribed') !== 'true')
+    })
+
+    return () => window.cancelAnimationFrame(frameId)
   }, [])
 
   return (
