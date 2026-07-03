@@ -29,6 +29,15 @@ export interface PushResult {
   failed: number
   total: number
   message?: string
+  attempts: PushAttemptResult[]
+}
+
+export interface PushAttemptResult {
+  deviceId: string
+  ok: boolean
+  statusCode?: number
+  error?: string
+  deleted?: boolean
 }
 
 export async function sendPush(payload: PushPayload): Promise<PushResult> {
@@ -46,7 +55,7 @@ export async function sendPush(payload: PushPayload): Promise<PushResult> {
   if (fetchError) throw fetchError
 
   if (!rows || rows.length === 0) {
-    return { sent: 0, failed: 0, total: 0, message: 'No subscribers yet' }
+    return { sent: 0, failed: 0, total: 0, message: 'No subscribers yet', attempts: [] }
   }
 
   const jsonPayload = JSON.stringify({
@@ -56,25 +65,45 @@ export async function sendPush(payload: PushPayload): Promise<PushResult> {
     ...(payload.url && { url: payload.url }),
   })
 
-  const results = await Promise.allSettled(
+  const attempts = await Promise.all(
     rows.map(async ({ device_id, subscription }: { device_id: string; subscription: webpush.PushSubscription }) => {
       try {
         await webpush.sendNotification(subscription, jsonPayload)
+        console.info('Push sent', { deviceId: device_id })
+        return {
+          deviceId: device_id,
+          ok: true,
+        } satisfies PushAttemptResult
       } catch (err) {
         // Only remove the subscription when the push service confirms it is
         // gone (410) or not found (404).  Transient errors (network issues,
         // rate limits, 5xx) must not delete a valid subscription.
         const statusCode = (err as { statusCode?: number }).statusCode
+        const errorMessage =
+          err instanceof Error ? err.message : 'Unknown push send error'
+        const deleted = statusCode === 410 || statusCode === 404
         if (statusCode === 410 || statusCode === 404) {
           await db.from('push_subscriptions').delete().eq('device_id', device_id)
         }
-        throw err
+        console.error('Push failed', {
+          deviceId: device_id,
+          statusCode,
+          error: errorMessage,
+          deleted,
+        })
+        return {
+          deviceId: device_id,
+          ok: false,
+          statusCode,
+          error: errorMessage,
+          deleted,
+        } satisfies PushAttemptResult
       }
     })
   )
 
-  const sent = results.filter(r => r.status === 'fulfilled').length
-  const failed = results.filter(r => r.status === 'rejected').length
+  const sent = attempts.filter(result => result.ok).length
+  const failed = attempts.filter(result => !result.ok).length
 
-  return { sent, failed, total: rows.length }
+  return { sent, failed, total: rows.length, attempts }
 }

@@ -20,6 +20,7 @@ export async function POST(request: Request) {
     }
 
     const result = await sendPush({ title, body, icon, url, deviceId })
+    console.info('Send notification result:', result)
 
     return NextResponse.json(result)
   } catch (error) {
