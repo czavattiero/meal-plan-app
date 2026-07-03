@@ -1,8 +1,33 @@
 'use client'
+import { useState } from 'react'
 import { useNotifications } from '@/hooks/useNotifications'
 
 export default function SettingsPage() {
   const { rules, toggleRule, updateTime } = useNotifications()
+  const [pushTitle, setPushTitle] = useState('')
+  const [pushBody, setPushBody] = useState('')
+  const [pushStatus, setPushStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+
+  async function sendCustomPush() {
+    if (!pushTitle.trim() || !pushBody.trim()) return
+    setPushStatus('sending')
+    try {
+      const res = await fetch('/api/push/send-ui', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: pushTitle.trim(), body: pushBody.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed')
+      setPushStatus('sent')
+      setPushTitle('')
+      setPushBody('')
+      setTimeout(() => setPushStatus('idle'), 3000)
+    } catch {
+      setPushStatus('error')
+      setTimeout(() => setPushStatus('idle'), 3000)
+    }
+  }
 
   return (
     <div style={{ padding: '24px 16px' }}>
@@ -89,6 +114,73 @@ export default function SettingsPage() {
         the app is closed, open the app in Safari on iPhone, tap the Share button,
         and select &#34;Add to Home Screen&#34;. Then reopen the app from your home screen
         — you will be asked to allow notifications.
+      </div>
+
+      <h2 style={{
+        fontSize: '12px', fontWeight: 700, color: '#1a4a2e',
+        marginTop: '32px', marginBottom: '14px',
+        textTransform: 'uppercase', letterSpacing: '0.06em',
+      }}>
+        Send a custom notification
+      </h2>
+
+      <div style={{
+        padding: '16px',
+        background: '#ffffff',
+        border: '0.5px solid #cce4d6',
+        borderRadius: '10px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+      }}>
+        <input
+          type="text"
+          placeholder="Title"
+          value={pushTitle}
+          onChange={e => setPushTitle(e.target.value)}
+          style={{
+            fontSize: '13px', padding: '10px 12px',
+            border: '0.5px solid #cce4d6', borderRadius: '8px',
+            background: '#f0f7f3', color: '#1a4a2e',
+            outline: 'none', width: '100%', boxSizing: 'border-box',
+          }}
+        />
+        <textarea
+          placeholder="Message"
+          value={pushBody}
+          onChange={e => setPushBody(e.target.value)}
+          rows={3}
+          style={{
+            fontSize: '13px', padding: '10px 12px',
+            border: '0.5px solid #cce4d6', borderRadius: '8px',
+            background: '#f0f7f3', color: '#1a4a2e',
+            outline: 'none', width: '100%', boxSizing: 'border-box',
+            resize: 'vertical', fontFamily: 'inherit',
+          }}
+        />
+        <button
+          onClick={sendCustomPush}
+          disabled={!pushTitle.trim() || !pushBody.trim() || pushStatus === 'sending'}
+          style={{
+            padding: '11px',
+            background: pushStatus === 'sent' ? '#2e7d52'
+              : pushStatus === 'error' ? '#c0392b'
+              : '#1a4a2e',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '13px',
+            fontWeight: 600,
+            cursor: pushTitle.trim() && pushBody.trim() && pushStatus === 'idle' ? 'pointer' : 'default',
+            opacity: !pushTitle.trim() || !pushBody.trim() ? 0.5 : 1,
+            transition: 'background 0.2s, opacity 0.2s',
+          }}
+        >
+          {pushStatus === 'sending' ? 'Sending…'
+            : pushStatus === 'sent' ? '✓ Sent'
+            : pushStatus === 'error' ? 'Failed — try again'
+            : 'Send to all devices'}
+        </button>
       </div>
     </div>
   )
