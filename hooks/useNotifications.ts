@@ -1,14 +1,21 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { NotificationRule } from '@/types'
-import { getSavedRules, saveRules, getNotificationsDue } from '@/lib/notifications'
+import { DEFAULT_RULES, getSavedRules, saveRules, getNotificationsDue } from '@/lib/notifications'
+import { syncNotificationRules } from './usePushSubscription'
 
 export function useNotifications() {
-  const [rules, setRules] = useState<NotificationRule[]>([])
+  const [rules, setRules] = useState<NotificationRule[]>(DEFAULT_RULES)
   const [active, setActive] = useState<NotificationRule[]>([])
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    setRules(getSavedRules())
+    const frameId = window.requestAnimationFrame(() => {
+      setRules(getSavedRules())
+      setLoaded(true)
+    })
+
+    return () => window.cancelAnimationFrame(frameId)
   }, [])
 
   const dismiss = useCallback((id: string) => {
@@ -25,10 +32,19 @@ export function useNotifications() {
   }, [rules, dismiss])
 
   useEffect(() => {
-    check()
+    const timeoutId = window.setTimeout(check, 0)
     const interval = setInterval(check, 60000)
-    return () => clearInterval(interval)
+
+    return () => {
+      clearTimeout(timeoutId)
+      clearInterval(interval)
+    }
   }, [check])
+
+  useEffect(() => {
+    if (!loaded) return
+    void syncNotificationRules(rules)
+  }, [loaded, rules])
 
   const toggleRule = (id: string) => {
     const updated = rules.map(r => r.id === id ? { ...r, enabled: !r.enabled } : r)
