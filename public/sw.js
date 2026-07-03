@@ -13,9 +13,8 @@ self.addEventListener('push', function (event) {
     }
   }
 
-  const body = data.url ? `${data.body}\n${resolvedUrl}` : data.body
   const options = {
-    body,
+    body: data.body,
     icon: data.icon || '/icon-192.png',
     data: { url: resolvedUrl },
     requireInteraction: true,
@@ -32,7 +31,7 @@ self.addEventListener('notificationclick', function (event) {
   const url = event.notification.data?.url || self.location.origin
 
   event.waitUntil(
-    clients.matchAll({ type: 'window' }).then(function (clientList) {
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
       for (const client of clientList) {
         if (client.url === url && 'focus' in client) return client.focus()
       }
