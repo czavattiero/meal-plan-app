@@ -7,9 +7,6 @@ export default function SettingsPage() {
   const [title, setTitle] = useState('Test')
   const [body, setBody] = useState('Have fun!')
   const [targetUrl, setTargetUrl] = useState('')
-  const [iconUrl, setIconUrl] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
-  const [videoUrl, setVideoUrl] = useState('')
   const [sending, setSending] = useState(false)
   const [sendResult, setSendResult] = useState<{
     type: 'success' | 'error'
@@ -22,9 +19,6 @@ export default function SettingsPage() {
     const cleanTitle = title.trim()
     const cleanBody = body.trim()
     const cleanTargetUrl = targetUrl.trim() || undefined
-    const cleanIconUrl = iconUrl.trim() || undefined
-    const cleanImageUrl = imageUrl.trim() || undefined
-    const cleanVideoUrl = videoUrl.trim() || undefined
 
     if (!cleanTitle || !cleanBody) {
       setSendResult({ type: 'error', message: 'Title and body are required.' })
@@ -50,9 +44,6 @@ export default function SettingsPage() {
           title: cleanTitle,
           body: cleanBody,
           url: cleanTargetUrl,
-          icon: cleanIconUrl,
-          image: cleanImageUrl,
-          videoUrl: cleanVideoUrl,
         }),
       })
       const payload = (await response.json().catch(() => null)) as
@@ -103,7 +94,7 @@ export default function SettingsPage() {
         fontSize: '12px', fontWeight: 700, color: '#1a4a2e',
         marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.06em',
       }}>
-        Notification schedule
+        Notification schedule (Calgary, Alberta time)
       </h2>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -231,7 +222,7 @@ export default function SettingsPage() {
               marginBottom: '8px',
             }}
           >
-            Rich content (optional)
+            URL (optional)
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <input
@@ -239,51 +230,6 @@ export default function SettingsPage() {
               value={targetUrl}
               onChange={e => setTargetUrl(e.target.value)}
               placeholder="Open URL when tapped (https://...)"
-              disabled={sending}
-              style={{
-                fontSize: '13px',
-                border: '0.5px solid #cce4d6',
-                borderRadius: '6px',
-                padding: '8px 10px',
-                background: '#fff',
-                color: '#1a4a2e',
-              }}
-            />
-            <input
-              type="url"
-              value={iconUrl}
-              onChange={e => setIconUrl(e.target.value)}
-              placeholder="Icon PNG URL (https://...png)"
-              disabled={sending}
-              style={{
-                fontSize: '13px',
-                border: '0.5px solid #cce4d6',
-                borderRadius: '6px',
-                padding: '8px 10px',
-                background: '#fff',
-                color: '#1a4a2e',
-              }}
-            />
-            <input
-              type="url"
-              value={imageUrl}
-              onChange={e => setImageUrl(e.target.value)}
-              placeholder="Image PNG URL (https://...png)"
-              disabled={sending}
-              style={{
-                fontSize: '13px',
-                border: '0.5px solid #cce4d6',
-                borderRadius: '6px',
-                padding: '8px 10px',
-                background: '#fff',
-                color: '#1a4a2e',
-              }}
-            />
-            <input
-              type="url"
-              value={videoUrl}
-              onChange={e => setVideoUrl(e.target.value)}
-              placeholder="Video URL (opens when tapped, if provided)"
               disabled={sending}
               style={{
                 fontSize: '13px',

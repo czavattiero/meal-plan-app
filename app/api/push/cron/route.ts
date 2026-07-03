@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { DEFAULT_RULES } from '@/lib/notifications'
+import { DEFAULT_RULES, getNotificationScheduleParts } from '@/lib/notifications'
 import { sendPush } from '@/lib/sendPush'
 
 export async function GET(request: Request) {
@@ -11,17 +11,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const now = new Date()
-  const h = now.getUTCHours()
-  const m = now.getUTCMinutes()
-  const d = now.getUTCDay()
+  const { hour, minute, dayOfWeek } = getNotificationScheduleParts()
 
   const due = DEFAULT_RULES.filter(
     rule =>
       rule.enabled &&
-      rule.daysOfWeek.includes(d) &&
-      rule.triggerHour === h &&
-      rule.triggerMinute === m
+      rule.daysOfWeek.includes(dayOfWeek) &&
+      rule.triggerHour === hour &&
+      rule.triggerMinute === minute
   )
 
   if (due.length === 0) {

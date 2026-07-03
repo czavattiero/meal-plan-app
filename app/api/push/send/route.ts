@@ -10,7 +10,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const { title, body, icon, image, url, videoUrl, deviceId } = await request.json()
+    const { title, body, icon, url, deviceId } = await request.json()
 
     if (!title || !body) {
       return NextResponse.json(
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const result = await sendPush({ title, body, icon, image, url, videoUrl, deviceId })
+    const result = await sendPush({ title, body, icon, url, deviceId })
 
     return NextResponse.json(result)
   } catch (error) {
