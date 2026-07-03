@@ -1,10 +1,16 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { NotificationRule } from '@/types'
 import { getSavedRules } from '@/lib/notifications'
 
 const PUSH_SUBSCRIBED_KEY = 'meal-plan-push-subscribed'
 const DEVICE_ID_KEY = 'meal-plan-device-id'
+
+export type PushSupportState = {
+  canSubscribe: boolean
+  reason: 'supported' | 'requires-install' | 'unsupported'
+  message?: string
+}
 
 export function getStoredDeviceId(): string | null {
   return localStorage.getItem(DEVICE_ID_KEY)
@@ -34,8 +40,90 @@ function clearPushSubscriptionFlag() {
   localStorage.removeItem(PUSH_SUBSCRIBED_KEY)
 }
 
+function parseIOSVersion(userAgent: string): { major: number; minor: number } | null {
+  const match = userAgent.match(/OS (\d+)[._](\d+)/)
+  if (!match) return null
+
+  return {
+    major: Number(match[1]),
+    minor: Number(match[2]),
+  }
+}
+
+function isAppleMobileDevice(): boolean {
+  if (typeof navigator === 'undefined') return false
+
+  return (
+    /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  )
+}
+
+function isStandaloneMode(): boolean {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false
+
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    Boolean((navigator as Navigator & { standalone?: boolean }).standalone)
+  )
+}
+
+export function getPushSupportState(): PushSupportState {
+  if (
+    typeof window === 'undefined' ||
+    typeof navigator === 'undefined'
+  ) {
+    return { canSubscribe: false, reason: 'unsupported' }
+  }
+
+  if (isAppleMobileDevice()) {
+    const iosVersion = parseIOSVersion(navigator.userAgent)
+
+    if (
+      iosVersion &&
+      (iosVersion.major < 16 ||
+        (iosVersion.major === 16 && iosVersion.minor < 4))
+    ) {
+      return {
+        canSubscribe: false,
+        reason: 'unsupported',
+        message:
+          'This iPhone cannot receive web push reminders. Apple only supports them on iOS 16.4+ devices, so older models such as iPhone 6 are not supported.',
+      }
+    }
+
+    if (!isStandaloneMode()) {
+      return {
+        canSubscribe: false,
+        reason: 'requires-install',
+        message:
+          'On iPhone, closed-app reminders only work after Add to Home Screen. Reopen the app from your home screen, then allow notifications there.',
+      }
+    }
+  }
+
+  if (
+    !('serviceWorker' in navigator) ||
+    !('PushManager' in window) ||
+    typeof Notification === 'undefined'
+  ) {
+    return {
+      canSubscribe: false,
+      reason: 'unsupported',
+      message:
+        'This device does not support web push reminders for this app. Meal reminders will only appear while the app is open.',
+    }
+  }
+
+  return { canSubscribe: true, reason: 'supported' }
+}
+
 export async function subscribeToPush(): Promise<boolean> {
-  if (!('serviceWorker' in navigator) || !('PushManager' in window) || typeof Notification === 'undefined') return false
+  const support = getPushSupportState()
+  if (!support.canSubscribe) {
+    clearPushSubscriptionFlag()
+    return false
+  }
 
   if (localStorage.getItem(PUSH_SUBSCRIBED_KEY) === 'true') {
     const reg = await navigator.serviceWorker.ready
@@ -116,11 +204,20 @@ export async function syncNotificationRules(
 }
 
 export function usePushSubscription() {
+  const [support, setSupport] = useState<PushSupportState | null>(null)
+
   useEffect(() => {
+    const nextSupport = getPushSupportState()
+    setSupport(nextSupport)
+
     if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
       clearPushSubscriptionFlag()
     }
 
-    void subscribeToPush()
+    if (nextSupport.canSubscribe) {
+      void subscribeToPush()
+    }
   }, [])
+
+  return support
 }

@@ -86,8 +86,9 @@ export default function SettingsPage() {
         Settings
       </h1>
       <p style={{ fontSize: '13px', color: '#5a7a68', marginBottom: '24px', lineHeight: 1.6 }}>
-        Notifications appear as banners while the app is open. On iPhone (iOS 16.4+,
-        installed via Add to Home Screen), they also fire when the app is closed.
+        Notifications appear as banners while the app is open. On iPhone, closed-app
+        reminders require iOS 16.4+, an iPhone 8 or newer, and launching the app from
+        Add to Home Screen.
       </p>
 
       <h2 style={{
@@ -283,9 +284,10 @@ export default function SettingsPage() {
         border: '0.5px solid #b8ddc8',
       }}>
         <strong>About push notifications:</strong> To receive notifications when
-        the app is closed, open the app in Safari on iPhone, tap the Share button,
-        and select &#34;Add to Home Screen&#34;. Then reopen the app from your home screen
-        — you will be asked to allow notifications.
+        the app is closed, use Safari on an iPhone running iOS 16.4+ (iPhone 8 or
+        newer), tap the Share button, and select &#34;Add to Home Screen&#34;. Then reopen
+        the app from your home screen and allow notifications there. Older devices,
+        including iPhone 6, cannot receive web push notifications for home screen apps.
       </div>
     </div>
   )
