@@ -204,20 +204,17 @@ export async function syncNotificationRules(
 }
 
 export function usePushSubscription() {
-  const [support, setSupport] = useState<PushSupportState | null>(null)
+  const [support] = useState<PushSupportState>(() => getPushSupportState())
 
   useEffect(() => {
-    const nextSupport = getPushSupportState()
-    setSupport(nextSupport)
-
     if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
       clearPushSubscriptionFlag()
     }
 
-    if (nextSupport.canSubscribe) {
+    if (support.canSubscribe) {
       void subscribeToPush()
     }
-  }, [])
+  }, [support])
 
   return support
 }

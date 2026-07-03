@@ -14,10 +14,7 @@ export default function NotificationProvider({
   const pushSupport = usePushSubscription()
 
   useEffect(() => {
-    if (typeof Notification === 'undefined' || !pushSupport?.canSubscribe) {
-      setShowPrompt(false)
-      return
-    }
+    if (typeof Notification === 'undefined' || !pushSupport?.canSubscribe) return
 
     const frameId = window.requestAnimationFrame(() => {
       setShowPrompt(localStorage.getItem('meal-plan-push-subscribed') !== 'true')
