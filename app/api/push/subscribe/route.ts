@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 import { extractRulePreferences } from '@/lib/notifications'
+import { isMissingNotificationRulesColumnError } from '@/lib/pushSubscriptionSchema'
 
 export async function POST(request: Request) {
   try {
@@ -15,20 +16,31 @@ export async function POST(request: Request) {
 
     const db = createServerClient()
 
-    const { error } = await db
+    const subscriptionPayload = {
+      device_id: deviceId,
+      subscription,
+      notification_rules: Array.isArray(rules)
+        ? extractRulePreferences(rules)
+        : null,
+      updated_at: new Date().toISOString(),
+      expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+    }
+
+    let { error } = await db
       .from('push_subscriptions')
-      .upsert(
-        {
-          device_id: deviceId,
-          subscription,
-          notification_rules: Array.isArray(rules)
-            ? extractRulePreferences(rules)
-            : null,
-          updated_at: new Date().toISOString(),
-          expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        { onConflict: 'device_id' }
-      )
+      .upsert(subscriptionPayload, { onConflict: 'device_id' })
+
+    if (error && isMissingNotificationRulesColumnError(error)) {
+      const legacyPayload = {
+        device_id: subscriptionPayload.device_id,
+        subscription: subscriptionPayload.subscription,
+        updated_at: subscriptionPayload.updated_at,
+        expires_at: subscriptionPayload.expires_at,
+      }
+      ;({ error } = await db
+        .from('push_subscriptions')
+        .upsert(legacyPayload, { onConflict: 'device_id' }))
+    }
 
     if (error) throw error
 

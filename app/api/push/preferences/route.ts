@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { extractRulePreferences } from '@/lib/notifications'
 import { createServerClient } from '@/lib/supabase'
+import { isMissingNotificationRulesColumnError } from '@/lib/pushSubscriptionSchema'
 
 export async function POST(request: Request) {
   try {
@@ -15,7 +16,7 @@ export async function POST(request: Request) {
 
     const db = createServerClient()
 
-    const { data, error } = await db
+    let { data, error } = await db
       .from('push_subscriptions')
       .update({
         notification_rules: extractRulePreferences(rules),
@@ -24,9 +25,19 @@ export async function POST(request: Request) {
       .eq('device_id', deviceId)
       .select('device_id')
 
+    if (error && isMissingNotificationRulesColumnError(error)) {
+      ;({ data, error } = await db
+        .from('push_subscriptions')
+        .update({
+          updated_at: new Date().toISOString(),
+        })
+        .eq('device_id', deviceId)
+        .select('device_id'))
+    }
+
     if (error) throw error
 
-    return NextResponse.json({ success: true, synced: data.length > 0 })
+    return NextResponse.json({ success: true, synced: (data?.length ?? 0) > 0 })
   } catch (error) {
     console.error('Preference sync error:', error)
     return NextResponse.json(

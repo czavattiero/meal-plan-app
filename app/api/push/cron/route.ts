@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getDueRules, getNotificationScheduleParts, mergeRulePreferences } from '@/lib/notifications'
 import { sendPush } from '@/lib/sendPush'
 import { createServerClient } from '@/lib/supabase'
+import { isMissingNotificationRulesColumnError } from '@/lib/pushSubscriptionSchema'
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization')
@@ -15,9 +16,15 @@ export async function GET(request: Request) {
   const now = new Date()
   const { hour, minute, dayOfWeek } = getNotificationScheduleParts(now)
   const db = createServerClient()
-  const { data: subscriptions, error } = await db
+  let { data: subscriptions, error } = await db
     .from('push_subscriptions')
     .select('device_id, notification_rules')
+
+  if (error && isMissingNotificationRulesColumnError(error)) {
+    ;({ data: subscriptions, error } = await db
+      .from('push_subscriptions')
+      .select('device_id'))
+  }
 
   if (error) {
     console.error('Cron subscription fetch error:', error)
