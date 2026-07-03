@@ -4,21 +4,32 @@ self.addEventListener('push', function (event) {
   const data = event.data.json()
   const title = data.title || 'Meal Plan'
   let resolvedUrl = self.location.origin
+  let displayUrl = ''
 
   if (data.url) {
     try {
-      resolvedUrl = new URL(data.url, self.location.origin).toString()
+      const parsedUrl = new URL(data.url, self.location.origin)
+      if (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') {
+        resolvedUrl = parsedUrl.toString()
+        displayUrl = parsedUrl.toString()
+      }
     } catch {
       resolvedUrl = self.location.origin
     }
   }
 
+  const notificationBody = typeof data.body === 'string' ? data.body : ''
+  const body =
+    displayUrl && !notificationBody.includes(displayUrl)
+      ? [notificationBody, displayUrl].filter(Boolean).join('\n')
+      : notificationBody
+
   const options = {
-    body: data.body,
+    body,
     icon: data.icon || '/icon-192.png',
     data: { url: resolvedUrl },
     requireInteraction: true,
-    actions: data.url
+    actions: displayUrl
       ? [{ action: 'open-link', title: 'Open link' }]
       : [],
   }
