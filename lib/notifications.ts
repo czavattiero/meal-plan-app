@@ -18,6 +18,10 @@ type NotificationRulePreference = Pick<
   'enabled' | 'triggerHour' | 'triggerMinute'
 >
 
+function normalizeTriggerMinute(value: number): number {
+  return value >= 30 ? 30 : 0
+}
+
 export type NotificationRulePreferences = Record<
   string,
   Partial<NotificationRulePreference>
@@ -149,7 +153,7 @@ export function extractRulePreferences(
     prefs[rule.id] = {
       enabled: rule.enabled,
       triggerHour: rule.triggerHour,
-      triggerMinute: rule.triggerMinute,
+      triggerMinute: normalizeTriggerMinute(rule.triggerMinute),
     }
   })
 
@@ -175,7 +179,7 @@ export function mergeRulePreferences(
         ? pref.triggerHour
         : rule.triggerHour,
       triggerMinute: isValidMinute(pref?.triggerMinute)
-        ? pref.triggerMinute
+        ? normalizeTriggerMinute(pref.triggerMinute)
         : rule.triggerMinute,
     }
   })

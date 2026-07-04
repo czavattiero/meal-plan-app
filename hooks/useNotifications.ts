@@ -53,7 +53,12 @@ export function useNotifications() {
   }
 
   const updateTime = (id: string, hour: number, minute: number) => {
-    const updated = rules.map(r => r.id === id ? { ...r, triggerHour: hour, triggerMinute: minute } : r)
+    const normalizedMinute = minute >= 30 ? 30 : 0
+    const updated = rules.map(r =>
+      r.id === id
+        ? { ...r, triggerHour: hour, triggerMinute: normalizedMinute }
+        : r
+    )
     setRules(updated)
     saveRules(updated)
   }
