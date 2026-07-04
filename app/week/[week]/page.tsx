@@ -76,10 +76,13 @@ export default async function WeekPage({ params }: Props) {
         </details>
       ))}
 
-      <div style={{ marginBottom: '28px' }}>
-        <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#1a4a2e', marginBottom: '12px' }}>
-          Week {weekNum} Snacks
-        </h2>
+      <details style={{ marginBottom: '28px' }}>
+        <summary style={{ cursor: 'pointer', listStyle: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#1a4a2e', margin: 0 }}>
+            Week {weekNum} Snacks
+          </h2>
+          <span style={{ fontSize: '11px', color: '#2d7a4a' }}>▼</span>
+        </summary>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {weekData.snacks.map((snack: Snack) => (
             <div key={snack.id} style={{
@@ -111,7 +114,7 @@ export default async function WeekPage({ params }: Props) {
             </div>
           ))}
         </div>
-      </div>
+      </details>
 
       <details>
         <summary style={{ cursor: 'pointer', listStyle: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
