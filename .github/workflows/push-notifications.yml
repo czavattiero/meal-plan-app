@@ -9,12 +9,25 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - name: Validate required secrets
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          missing=()
+          [ -z "${APP_URL}" ]     && missing+=("APP_URL")
+          [ -z "${CRON_SECRET}" ] && missing+=("CRON_SECRET")
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "ERROR: The following repository secrets are not set: ${missing[*]}"
+            echo "Go to Settings \u2192 Secrets and variables \u2192 Actions and add them."
+            exit 1
+          fi
+
       - name: Trigger push notification cron
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           APP_URL: ${{ secrets.APP_URL }}
         run: |
-          TYPE="Bearer"
-          curl -sf \
-            -H "Authorization: ${TYPE} ${CRON_SECRET}" \
+          curl --fail-with-body --max-time 30 \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
             "${APP_URL}/api/push/cron"

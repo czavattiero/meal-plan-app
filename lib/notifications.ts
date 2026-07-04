@@ -3,6 +3,11 @@ import { NotificationRule } from '@/types'
 const PREFS_KEY = 'meal-plan-notification-prefs'
 const FIRED_KEY = 'meal-plan-notifications-fired'
 const NOTIFICATION_TIME_ZONE = 'America/Edmonton'
+// GitHub Actions cron jobs can fire up to ~15 minutes late.
+// Accept a rule as due if the scheduled time was within the last
+// CRON_TOLERANCE_MINUTES minutes (must be < half the cron interval to avoid
+// double-firing; cron runs every 30 min so 14 is the safe maximum).
+const CRON_TOLERANCE_MINUTES = 14
 const WEEKDAY_INDEX: Record<string, number> = {
   Sun: 0,
   Mon: 1,
@@ -166,11 +171,15 @@ export function getDueRules(
   date = new Date()
 ): NotificationRule[] {
   const { dayOfWeek, hour, minute } = getNotificationScheduleParts(date)
+  const currentMinutes = hour * 60 + minute
 
   return rules.filter(rule => {
     if (!rule.enabled) return false
     if (!rule.daysOfWeek.includes(dayOfWeek)) return false
-    return rule.triggerHour === hour && rule.triggerMinute === minute
+    const ruleMinutes = rule.triggerHour * 60 + rule.triggerMinute
+    const minutesSinceDue =
+      ((currentMinutes - ruleMinutes) % (24 * 60) + 24 * 60) % (24 * 60)
+    return minutesSinceDue < CRON_TOLERANCE_MINUTES
   })
 }
 
