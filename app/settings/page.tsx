@@ -50,18 +50,10 @@ export default function SettingsPage() {
     setSending(true)
     setSendResult(null)
 
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    }
-    const publicCronSecret = process.env.NEXT_PUBLIC_CRON_SECRET?.trim()
-    if (publicCronSecret) {
-      headers.Authorization = ['Bearer', publicCronSecret].join(' ')
-    }
-
     try {
       const response = await fetch('/api/push/send', {
         method: 'POST',
-        headers,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: cleanTitle,
           body: cleanBody,

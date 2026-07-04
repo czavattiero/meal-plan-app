@@ -3,13 +3,6 @@ import { sendPush } from '@/lib/sendPush'
 
 export async function POST(request: Request) {
   try {
-    if (process.env.CRON_SECRET) {
-      const authHeader = request.headers.get('authorization')
-      if (authHeader !== 'Bearer ' + process.env.CRON_SECRET) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-      }
-    }
-
     const { title, body, icon, image, url, deviceId } = await request.json()
 
     if (!title || !body) {
