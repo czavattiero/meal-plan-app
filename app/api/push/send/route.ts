@@ -10,7 +10,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const { title, body, icon, url, deviceId } = await request.json()
+    const { title, body, icon, image, url, deviceId } = await request.json()
 
     if (!title || !body) {
       return NextResponse.json(
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const result = await sendPush({ title, body, icon, url, deviceId })
+    const result = await sendPush({ title, body, icon, image, url, deviceId })
     console.info('Send notification result:', result)
 
     return NextResponse.json(result)
