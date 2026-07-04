@@ -23,7 +23,16 @@ export type NotificationRulePreferences = Record<
   Partial<NotificationRulePreference>
 >
 
-export function getNotificationScheduleParts(date = new Date()) {
+export type NotificationScheduleParts = {
+  dayOfWeek: number
+  hour: number
+  minute: number
+  dateKey: string
+}
+
+export function getNotificationScheduleParts(
+  date = new Date()
+): NotificationScheduleParts {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: NOTIFICATION_TIME_ZONE,
     year: 'numeric',
@@ -46,6 +55,17 @@ export function getNotificationScheduleParts(date = new Date()) {
     hour: Number(values.hour),
     minute: Number(values.minute),
     dateKey: `${values.year}-${values.month}-${values.day}`,
+  }
+}
+
+export function getMostRecentHalfHourScheduleParts(
+  date = new Date()
+): NotificationScheduleParts {
+  const parts = getNotificationScheduleParts(date)
+
+  return {
+    ...parts,
+    minute: parts.minute < 30 ? 0 : 30,
   }
 }
 
@@ -161,17 +181,35 @@ export function mergeRulePreferences(
   })
 }
 
-export function getDueRules(
+function getDueRulesForScheduleParts(
   rules: NotificationRule[],
-  date = new Date()
+  { dayOfWeek, hour, minute }: Pick<
+    NotificationScheduleParts,
+    'dayOfWeek' | 'hour' | 'minute'
+  >
 ): NotificationRule[] {
-  const { dayOfWeek, hour, minute } = getNotificationScheduleParts(date)
-
   return rules.filter(rule => {
     if (!rule.enabled) return false
     if (!rule.daysOfWeek.includes(dayOfWeek)) return false
     return rule.triggerHour === hour && rule.triggerMinute === minute
   })
+}
+
+export function getDueRules(
+  rules: NotificationRule[],
+  date = new Date()
+): NotificationRule[] {
+  return getDueRulesForScheduleParts(rules, getNotificationScheduleParts(date))
+}
+
+export function getDueRulesForMostRecentHalfHour(
+  rules: NotificationRule[],
+  date = new Date()
+): NotificationRule[] {
+  return getDueRulesForScheduleParts(
+    rules,
+    getMostRecentHalfHourScheduleParts(date)
+  )
 }
 
 export function getSavedRules(): NotificationRule[] {

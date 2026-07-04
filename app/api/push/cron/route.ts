@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server'
-import { getDueRules, getNotificationScheduleParts, mergeRulePreferences } from '@/lib/notifications'
+import {
+  getDueRulesForMostRecentHalfHour,
+  getMostRecentHalfHourScheduleParts,
+  getNotificationScheduleParts,
+  mergeRulePreferences,
+} from '@/lib/notifications'
 import { sendPush } from '@/lib/sendPush'
 import { createServerClient } from '@/lib/supabase'
 import { isMissingNotificationRulesColumnError } from '@/lib/pushSubscriptionSchema'
@@ -14,7 +19,9 @@ export async function GET(request: Request) {
   }
 
   const now = new Date()
-  const { hour, minute, dayOfWeek } = getNotificationScheduleParts(now)
+  const { hour: currentHour, minute: currentMinute } =
+    getNotificationScheduleParts(now)
+  const { hour, minute, dayOfWeek } = getMostRecentHalfHourScheduleParts(now)
   const db = createServerClient()
   let { data: subscriptions, error } = await db
     .from('push_subscriptions')
@@ -35,12 +42,13 @@ export async function GET(request: Request) {
   }
 
   const dueNotifications = (subscriptions ?? []).flatMap(subscription =>
-    getDueRules(mergeRulePreferences(subscription.notification_rules), now).map(
-      rule => ({
-        deviceId: subscription.device_id,
-        rule,
-      })
-    )
+    getDueRulesForMostRecentHalfHour(
+      mergeRulePreferences(subscription.notification_rules),
+      now
+    ).map(rule => ({
+      deviceId: subscription.device_id,
+      rule,
+    }))
   )
 
   if (dueNotifications.length === 0) {
@@ -50,6 +58,8 @@ export async function GET(request: Request) {
       hour,
       minute,
       dayOfWeek,
+      currentHour,
+      currentMinute,
       message: 'No notifications due',
     })
   }
@@ -81,5 +91,7 @@ export async function GET(request: Request) {
     hour,
     minute,
     dayOfWeek,
+    currentHour,
+    currentMinute,
   })
 }
