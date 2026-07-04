@@ -34,8 +34,11 @@ export default async function WeekPage({ params }: Props) {
       </div>
 
       {weekData.days.map((day: DayPlan) => (
-        <div key={day.day} style={{ marginBottom: '28px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+        <details key={day.day} style={{ marginBottom: '28px' }}>
+          <summary style={{
+            display: 'flex', alignItems: 'center', gap: '12px',
+            cursor: 'pointer', listStyle: 'none',
+          }}>
             <div style={{
               width: '38px', height: '38px', borderRadius: '50%',
               background: '#1a4a2e', color: '#f0b429',
@@ -44,15 +47,16 @@ export default async function WeekPage({ params }: Props) {
             }}>
               {day.day}
             </div>
-            <div>
+            <div style={{ flex: 1 }}>
               <div style={{ fontSize: '14px', fontWeight: 600, color: '#0f2419' }}>Day {day.day}</div>
               <div style={{ fontSize: '11px', color: '#5a7a68' }}>
                 {day.breakfast.calories + day.lunch.calories + day.dinner.calories} kcal meals total
               </div>
             </div>
-          </div>
+            <div style={{ fontSize: '11px', color: '#2d7a4a', flexShrink: 0 }}>▼</div>
+          </summary>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <MealCard meal={day.breakfast} variant="breakfast" />
             <MealCard meal={day.lunch} variant="lunch" />
             <MealCard meal={day.dinner} variant="dinner" />
@@ -69,7 +73,7 @@ export default async function WeekPage({ params }: Props) {
               <span><strong>Leftovers:</strong> {day.leftover}</span>
             </div>
           )}
-        </div>
+        </details>
       ))}
 
       <div style={{ marginBottom: '28px' }}>
@@ -109,12 +113,15 @@ export default async function WeekPage({ params }: Props) {
         </div>
       </div>
 
-      <div>
-        <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#1a4a2e', marginBottom: '12px' }}>
-          Week {weekNum} Grocery List
-        </h2>
+      <details>
+        <summary style={{ cursor: 'pointer', listStyle: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#1a4a2e', margin: 0 }}>
+            Week {weekNum} Grocery List
+          </h2>
+          <span style={{ fontSize: '11px', color: '#2d7a4a' }}>▼</span>
+        </summary>
         <GroceryChecklist week={weekNum} items={weekData.groceryList} />
-      </div>
+      </details>
     </div>
   )
 }
