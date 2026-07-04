@@ -20,6 +20,7 @@ export interface PushPayload {
   title: string
   body: string
   icon?: string
+  image?: string
   url?: string
   deviceId?: string
 }
@@ -40,6 +41,23 @@ export interface PushAttemptResult {
   deleted?: boolean
 }
 
+function sanitizeHttpUrl(value: string | undefined): string | undefined {
+  if (!value) return undefined
+  const trimmed = value.trim()
+  if (!trimmed) return undefined
+
+  try {
+    const parsed = new URL(trimmed)
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      return parsed.toString()
+    }
+  } catch {
+    return undefined
+  }
+
+  return undefined
+}
+
 export async function sendPush(payload: PushPayload): Promise<PushResult> {
   initVapid()
 
@@ -58,11 +76,15 @@ export async function sendPush(payload: PushPayload): Promise<PushResult> {
     return { sent: 0, failed: 0, total: 0, message: 'No subscribers yet', attempts: [] }
   }
 
+  const safeImage = sanitizeHttpUrl(payload.image)
+  const safeUrl = sanitizeHttpUrl(payload.url)
+
   const jsonPayload = JSON.stringify({
     title: payload.title,
     body: payload.body,
     icon: payload.icon ?? '/icon-192.png',
-    ...(payload.url && { url: payload.url }),
+    ...(safeImage && { image: safeImage }),
+    ...(safeUrl && { url: safeUrl }),
   })
 
   const attempts = await Promise.all(

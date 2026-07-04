@@ -3,6 +3,17 @@ self.addEventListener('push', function (event) {
 
   const data = event.data.json()
   const title = data.title || 'Meal Plan'
+  const resolveAssetUrl = function (value) {
+    if (typeof value !== 'string' || !value.trim()) return undefined
+    try {
+      const parsed = new URL(value, self.location.origin)
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        return parsed.toString()
+      }
+    } catch {}
+    return undefined
+  }
+
   let resolvedUrl = self.location.origin
   let displayUrl = ''
 
@@ -24,9 +35,13 @@ self.addEventListener('push', function (event) {
       ? [notificationBody, displayUrl].filter(Boolean).join('\n')
       : notificationBody
 
+  const icon = resolveAssetUrl(data.icon) || '/icon-192.png'
+  const image = resolveAssetUrl(data.image)
+
   const options = {
     body,
-    icon: data.icon || '/icon-192.png',
+    icon,
+    ...(image ? { image } : {}),
     data: { url: resolvedUrl },
     requireInteraction: true,
     actions: displayUrl

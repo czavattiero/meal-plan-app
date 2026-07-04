@@ -22,6 +22,7 @@ export default function SettingsPage() {
   const { rules, toggleRule, updateTime } = useNotifications()
   const [title, setTitle] = useState('Test')
   const [body, setBody] = useState('Have fun!')
+  const [imageUrl, setImageUrl] = useState('')
   const [targetUrl, setTargetUrl] = useState('')
   const [sending, setSending] = useState(false)
   const [sendResult, setSendResult] = useState<{
@@ -43,6 +44,7 @@ export default function SettingsPage() {
 
     const cleanTitle = title.trim()
     const cleanBody = body.trim()
+    const cleanImageUrl = imageUrl.trim() || undefined
     const cleanTargetUrl = targetUrl.trim() || undefined
 
     if (!cleanTitle || !cleanBody) {
@@ -68,6 +70,7 @@ export default function SettingsPage() {
         body: JSON.stringify({
           title: cleanTitle,
           body: cleanBody,
+          image: cleanImageUrl,
           url: cleanTargetUrl,
         }),
       })
@@ -253,6 +256,21 @@ export default function SettingsPage() {
             URL (optional)
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <input
+              type="url"
+              value={imageUrl}
+              onChange={e => setImageUrl(e.target.value)}
+              placeholder="Image URL (https://...)"
+              disabled={sending}
+              style={{
+                fontSize: '13px',
+                border: '0.5px solid #cce4d6',
+                borderRadius: '6px',
+                padding: '8px 10px',
+                background: '#fff',
+                color: '#1a4a2e',
+              }}
+            />
             <input
               type="url"
               value={targetUrl}
