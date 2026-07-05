@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { NotificationRule } from '@/types'
-import { getSavedRules } from '@/lib/notifications'
+import { getSavedRules, hasSavedRulePreferences } from '@/lib/notifications'
 
 const PUSH_SUBSCRIBED_KEY = 'meal-plan-push-subscribed'
 const DEVICE_ID_KEY = 'meal-plan-device-id'
@@ -50,7 +50,7 @@ async function saveSubscription(
     body: JSON.stringify({
       subscription,
       deviceId,
-      rules: getSavedRules(),
+      rules: hasSavedRulePreferences() ? getSavedRules() : null,
     }),
   })
 

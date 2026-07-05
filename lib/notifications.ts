@@ -163,10 +163,15 @@ export function extractRulePreferences(
 export function mergeRulePreferences(
   preferences?: unknown
 ): NotificationRule[] {
-  const prefs =
-    preferences && typeof preferences === 'object'
-      ? (preferences as NotificationRulePreferences)
-      : {}
+  if (
+    !preferences ||
+    typeof preferences !== 'object' ||
+    Object.keys(preferences as object).length === 0
+  ) {
+    return DEFAULT_RULES.map(rule => ({ ...rule, enabled: false }))
+  }
+
+  const prefs = preferences as NotificationRulePreferences
 
   return DEFAULT_RULES.map(rule => {
     const pref = prefs[rule.id]
@@ -214,6 +219,11 @@ export function getDueRulesForMostRecentHalfHour(
     rules,
     getMostRecentHalfHourScheduleParts(date)
   )
+}
+
+export function hasSavedRulePreferences(): boolean {
+  if (typeof window === 'undefined') return false
+  return localStorage.getItem(PREFS_KEY) !== null
 }
 
 export function getSavedRules(): NotificationRule[] {
