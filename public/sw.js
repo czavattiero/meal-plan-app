@@ -30,8 +30,9 @@ self.addEventListener('push', function (event) {
     }
   }
 
+  const subjectLine = title || 'Notification'
   const notificationBody = typeof data.body === 'string' ? data.body.trim() : ''
-  const bodyLines = [title, notificationBody]
+  const bodyLines = [subjectLine, notificationBody]
 
   if (displayUrl && !notificationBody.includes(displayUrl)) {
     bodyLines.push(displayUrl)
