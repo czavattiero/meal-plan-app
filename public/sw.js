@@ -3,7 +3,6 @@ self.addEventListener('push', function (event) {
 
   const data = event.data.json()
   const title = typeof data.title === 'string' ? data.title.trim() : ''
-  const appTitle = 'Meal plan'
   const resolveAssetUrl = function (value) {
     if (typeof value !== 'string' || !value.trim()) return undefined
     try {
@@ -30,9 +29,9 @@ self.addEventListener('push', function (event) {
     }
   }
 
-  const subjectLine = title || 'Notification'
+  const subjectLine = title || 'Meal plan'
   const notificationBody = typeof data.body === 'string' ? data.body.trim() : ''
-  const bodyLines = [subjectLine, notificationBody]
+  const bodyLines = [notificationBody]
 
   if (displayUrl && !notificationBody.includes(displayUrl)) {
     bodyLines.push(displayUrl)
@@ -54,7 +53,7 @@ self.addEventListener('push', function (event) {
       : [],
   }
 
-  event.waitUntil(self.registration.showNotification(appTitle, options))
+  event.waitUntil(self.registration.showNotification(subjectLine, options))
 })
 
 self.addEventListener('notificationclick', function (event) {
