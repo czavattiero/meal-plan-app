@@ -15,3 +15,15 @@ export function isMissingNotificationRulesColumnError(error: unknown): boolean {
 
   return code === 'PGRST204' || code === '42703' || normalized.includes('column')
 }
+
+export function isMissingLastNotifiedSlotColumnError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false
+
+  const { code, message, details, hint } = error as SupabaseErrorLike
+  const normalized = `${message ?? ''} ${details ?? ''} ${hint ?? ''}`.toLowerCase()
+
+  if (!normalized.includes('last_notified_slot')) return false
+
+  return code === 'PGRST204' || code === '42703' || normalized.includes('column')
+}
+
