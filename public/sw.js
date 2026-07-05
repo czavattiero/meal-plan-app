@@ -2,7 +2,8 @@ self.addEventListener('push', function (event) {
   if (!event.data) return
 
   const data = event.data.json()
-  const title = data.title || 'Meal Plan'
+  const title = typeof data.title === 'string' ? data.title.trim() : ''
+  const appTitle = 'Meal plan'
   const resolveAssetUrl = function (value) {
     if (typeof value !== 'string' || !value.trim()) return undefined
     try {
@@ -29,11 +30,14 @@ self.addEventListener('push', function (event) {
     }
   }
 
-  const notificationBody = typeof data.body === 'string' ? data.body : ''
-  const body =
-    displayUrl && !notificationBody.includes(displayUrl)
-      ? [notificationBody, displayUrl].filter(Boolean).join('\n')
-      : notificationBody
+  const notificationBody = typeof data.body === 'string' ? data.body.trim() : ''
+  const bodyLines = [title, notificationBody]
+
+  if (displayUrl && !notificationBody.includes(displayUrl)) {
+    bodyLines.push(displayUrl)
+  }
+
+  const body = bodyLines.filter(Boolean).join('\n')
 
   const icon = resolveAssetUrl(data.icon) || '/icon-192.png'
   const image = resolveAssetUrl(data.image)
@@ -49,7 +53,7 @@ self.addEventListener('push', function (event) {
       : [],
   }
 
-  event.waitUntil(self.registration.showNotification(title, options))
+  event.waitUntil(self.registration.showNotification(appTitle, options))
 })
 
 self.addEventListener('notificationclick', function (event) {
