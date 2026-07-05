@@ -20,6 +20,7 @@ type SendPayload = {
 
 export default function SettingsPage() {
   const { rules, toggleRule, updateTime } = useNotifications()
+  const [scheduleOpen, setScheduleOpen] = useState(true)
   const [title, setTitle] = useState('Test')
   const [body, setBody] = useState('Have fun!')
   const [sending, setSending] = useState(false)
@@ -106,13 +107,29 @@ export default function SettingsPage() {
         Add to Home Screen.
       </p>
 
-      <h2 style={{
-        fontSize: '12px', fontWeight: 700, color: '#1a4a2e',
-        marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.06em',
-      }}>
-        Notification schedule (Calgary, Alberta time, every 30 minutes)
-      </h2>
+      <button
+        onClick={() => setScheduleOpen(o => !o)}
+        style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          width: '100%', background: 'none', border: 'none', cursor: 'pointer',
+          padding: 0, marginBottom: '14px',
+        }}
+      >
+        <h2 style={{
+          fontSize: '12px', fontWeight: 700, color: '#1a4a2e',
+          margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em',
+        }}>
+          Notification schedule (Calgary, Alberta time, every 30 minutes)
+        </h2>
+        <span style={{
+          fontSize: '14px', color: '#1a4a2e', flexShrink: 0, marginLeft: '8px',
+          display: 'inline-block',
+          transform: scheduleOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
+          transition: 'transform 0.2s',
+        }}>▾</span>
+      </button>
 
+      {scheduleOpen && (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
         {rules.map(rule => (
           <div key={rule.id} style={{
@@ -171,6 +188,7 @@ export default function SettingsPage() {
           </div>
         ))}
       </div>
+      )}
 
       <h2 style={{
         fontSize: '12px', fontWeight: 700, color: '#1a4a2e',
