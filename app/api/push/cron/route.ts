@@ -1,13 +1,18 @@
 import { NextResponse } from 'next/server'
 import {
-  getDueRulesForMostRecentHalfHour,
+  formatSlotKey,
+  getDueRulesForScheduleParts,
   getMostRecentHalfHourScheduleParts,
   getNotificationScheduleParts,
+  getPrevHalfHourScheduleParts,
   mergeRulePreferences,
 } from '@/lib/notifications'
 import { sendPush } from '@/lib/sendPush'
 import { createServerClient } from '@/lib/supabase'
-import { isMissingNotificationRulesColumnError } from '@/lib/pushSubscriptionSchema'
+import {
+  isMissingLastNotifiedSlotColumnError,
+  isMissingNotificationRulesColumnError,
+} from '@/lib/pushSubscriptionSchema'
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization')
@@ -21,11 +26,24 @@ export async function GET(request: Request) {
   const now = new Date()
   const { hour: currentHour, minute: currentMinute } =
     getNotificationScheduleParts(now)
-  const { hour, minute, dayOfWeek } = getMostRecentHalfHourScheduleParts(now)
+  const currentSlot = getMostRecentHalfHourScheduleParts(now)
+  const prevSlot = getPrevHalfHourScheduleParts(now)
+  const currentSlotKey = formatSlotKey(currentSlot)
+  const prevSlotKey = formatSlotKey(prevSlot)
+  const { hour, minute, dayOfWeek } = currentSlot
+
   const db = createServerClient()
+
+  // Fetch subscriptions with both optional columns; fall back if either is missing
   let { data: subscriptions, error } = await db
     .from('push_subscriptions')
-    .select('device_id, notification_rules')
+    .select('device_id, notification_rules, last_notified_slot')
+
+  if (error && isMissingLastNotifiedSlotColumnError(error)) {
+    ;({ data: subscriptions, error } = await db
+      .from('push_subscriptions')
+      .select('device_id, notification_rules'))
+  }
 
   if (error && isMissingNotificationRulesColumnError(error)) {
     ;({ data: subscriptions, error } = await db
@@ -41,39 +59,37 @@ export async function GET(request: Request) {
     )
   }
 
-  const dueNotifications = (subscriptions ?? []).flatMap(subscription =>
-    getDueRulesForMostRecentHalfHour(
-      mergeRulePreferences(subscription.notification_rules),
-      now
-    ).map(rule => ({
-      deviceId: subscription.device_id,
-      rule,
-    }))
-  )
+  // For each subscription determine which slots (previous and/or current) have
+  // not yet been processed, to recover from late or skipped GitHub Actions runs.
+  const dueNotifications = (subscriptions ?? []).flatMap(subscription => {
+    const rules = mergeRulePreferences(subscription.notification_rules)
+    const lastFired: string = subscription.last_notified_slot ?? ''
 
-  if (dueNotifications.length === 0) {
-    return NextResponse.json({
-      sent: 0,
-      total: 0,
-      hour,
-      minute,
-      dayOfWeek,
-      currentHour,
-      currentMinute,
-      message: 'No notifications due',
-    })
-  }
+    const slotsToCheck = []
+    if (prevSlotKey > lastFired) slotsToCheck.push(prevSlot)
+    if (currentSlotKey > lastFired) slotsToCheck.push(currentSlot)
 
-  const results = await Promise.allSettled(
-    dueNotifications.map(({ deviceId, rule }) =>
-      sendPush({
-        title: rule.title,
-        body: rule.body,
-        icon: rule.icon,
-        deviceId,
-      })
+    return slotsToCheck.flatMap(slot =>
+      getDueRulesForScheduleParts(rules, slot).map(rule => ({
+        deviceId: subscription.device_id,
+        rule,
+      }))
     )
-  )
+  })
+
+  // Send all due notifications
+  const results = dueNotifications.length > 0
+    ? await Promise.allSettled(
+        dueNotifications.map(({ deviceId, rule }) =>
+          sendPush({
+            title: rule.title,
+            body: rule.body,
+            icon: rule.icon,
+            deviceId,
+          })
+        )
+      )
+    : []
 
   const sent = results.reduce((count, result) => {
     if (result.status !== 'fulfilled') return count
@@ -84,6 +100,16 @@ export async function GET(request: Request) {
     return count + 1
   }, 0)
 
+  // Advance the deduplication cursor for all subscriptions so future runs
+  // do not re-fire slots that were already handled.
+  const deviceIds = (subscriptions ?? []).map(s => s.device_id)
+  if (deviceIds.length > 0) {
+    await db
+      .from('push_subscriptions')
+      .update({ last_notified_slot: currentSlotKey })
+      .in('device_id', deviceIds)
+  }
+
   return NextResponse.json({
     sent,
     failed,
@@ -93,5 +119,8 @@ export async function GET(request: Request) {
     dayOfWeek,
     currentHour,
     currentMinute,
+    currentSlotKey,
+    prevSlotKey,
   })
 }
+

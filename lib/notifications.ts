@@ -73,6 +73,18 @@ export function getMostRecentHalfHourScheduleParts(
   }
 }
 
+export function getPrevHalfHourScheduleParts(
+  date = new Date()
+): NotificationScheduleParts {
+  return getMostRecentHalfHourScheduleParts(
+    new Date(date.getTime() - 30 * 60 * 1000)
+  )
+}
+
+export function formatSlotKey(parts: NotificationScheduleParts): string {
+  return `${parts.dateKey}-${String(parts.hour).padStart(2, '0')}:${String(parts.minute).padStart(2, '0')}`
+}
+
 export const DEFAULT_RULES: NotificationRule[] = [
   {
     id: 'breakfast',
@@ -185,7 +197,7 @@ export function mergeRulePreferences(
   })
 }
 
-function getDueRulesForScheduleParts(
+export function getDueRulesForScheduleParts(
   rules: NotificationRule[],
   { dayOfWeek, hour, minute }: Pick<
     NotificationScheduleParts,
