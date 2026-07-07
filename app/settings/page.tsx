@@ -119,7 +119,7 @@ export default function SettingsPage() {
           fontSize: '12px', fontWeight: 700, color: '#1a4a2e',
           margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em',
         }}>
-          Notification schedule (Calgary, Alberta time, every 30 minutes)
+          Notification schedule (Calgary, Alberta time, every 15 minutes)
         </h2>
         <span style={{
           fontSize: '14px', color: '#1a4a2e', flexShrink: 0, marginLeft: '8px',
@@ -152,7 +152,7 @@ export default function SettingsPage() {
             </div>
             <input
               type="time"
-              step={1800}
+              step={900}
               value={`${String(rule.triggerHour).padStart(2, '0')}:${String(rule.triggerMinute).padStart(2, '0')}`}
               onChange={e => {
                 const [h, m] = e.target.value.split(':').map(Number)
