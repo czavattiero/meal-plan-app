@@ -1,13 +1,14 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { NotificationRule } from '@/types'
-import { DEFAULT_RULES, getSavedRules, saveRules, getNotificationsDue } from '@/lib/notifications'
+import { DEFAULT_RULES, getSavedRules, saveRules, getNotificationsDue, hasSavedRulePreferences } from '@/lib/notifications'
 import { syncNotificationRules } from './usePushSubscription'
 
 export function useNotifications() {
   const [rules, setRules] = useState<NotificationRule[]>(DEFAULT_RULES)
   const [active, setActive] = useState<NotificationRule[]>([])
   const [loaded, setLoaded] = useState(false)
+  const initialSyncDone = useRef(false)
 
   useEffect(() => {
     const frameId = window.requestAnimationFrame(() => {
@@ -43,6 +44,17 @@ export function useNotifications() {
 
   useEffect(() => {
     if (!loaded) return
+    if (!initialSyncDone.current) {
+      initialSyncDone.current = true
+      // Only sync on load when the user has previously saved explicit preferences.
+      // Without this guard, every new subscriber would silently receive all default
+      // notifications because DEFAULT_RULES are all enabled.
+      if (hasSavedRulePreferences()) {
+        void syncNotificationRules(rules)
+      }
+      return
+    }
+    // After the initial load, always sync on user-triggered rule changes.
     void syncNotificationRules(rules)
   }, [loaded, rules])
 
