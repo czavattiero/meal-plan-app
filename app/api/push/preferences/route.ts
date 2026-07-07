@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server'
 import { extractRulePreferences } from '@/lib/notifications'
 import { createServerClient } from '@/lib/supabase'
-import { isMissingNotificationRulesColumnError } from '@/lib/pushSubscriptionSchema'
+import {
+  isMissingLastNotifiedSlotColumnError,
+  isMissingNotificationRulesColumnError,
+} from '@/lib/pushSubscriptionSchema'
 
 export async function POST(request: Request) {
   try {
@@ -20,10 +23,22 @@ export async function POST(request: Request) {
       .from('push_subscriptions')
       .update({
         notification_rules: extractRulePreferences(rules),
+        last_notified_slot: null,
         updated_at: new Date().toISOString(),
       })
       .eq('device_id', deviceId)
       .select('device_id')
+
+    if (error && isMissingLastNotifiedSlotColumnError(error)) {
+      ;({ data, error } = await db
+        .from('push_subscriptions')
+        .update({
+          notification_rules: extractRulePreferences(rules),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('device_id', deviceId)
+        .select('device_id'))
+    }
 
     if (error && isMissingNotificationRulesColumnError(error)) {
       ;({ data, error } = await db
