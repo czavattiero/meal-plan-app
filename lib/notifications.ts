@@ -19,7 +19,7 @@ type NotificationRulePreference = Pick<
 >
 
 function normalizeTriggerMinute(value: number): number {
-  return value >= 30 ? 30 : 0
+  return Math.floor(Math.min(Math.max(value, 0), 59) / 15) * 15
 }
 
 export type NotificationRulePreferences = Record<
@@ -62,22 +62,22 @@ export function getNotificationScheduleParts(
   }
 }
 
-export function getMostRecentHalfHourScheduleParts(
+export function getMostRecentQuarterHourScheduleParts(
   date = new Date()
 ): NotificationScheduleParts {
   const parts = getNotificationScheduleParts(date)
 
   return {
     ...parts,
-    minute: parts.minute < 30 ? 0 : 30,
+    minute: Math.floor(parts.minute / 15) * 15,
   }
 }
 
-export function getPrevHalfHourScheduleParts(
+export function getPrevQuarterHourScheduleParts(
   date = new Date()
 ): NotificationScheduleParts {
-  return getMostRecentHalfHourScheduleParts(
-    new Date(date.getTime() - 30 * 60 * 1000)
+  return getMostRecentQuarterHourScheduleParts(
+    new Date(date.getTime() - 15 * 60 * 1000)
   )
 }
 
@@ -218,13 +218,13 @@ export function getDueRules(
   return getDueRulesForScheduleParts(rules, getNotificationScheduleParts(date))
 }
 
-export function getDueRulesForMostRecentHalfHour(
+export function getDueRulesForMostRecentQuarterHour(
   rules: NotificationRule[],
   date = new Date()
 ): NotificationRule[] {
   return getDueRulesForScheduleParts(
     rules,
-    getMostRecentHalfHourScheduleParts(date)
+    getMostRecentQuarterHourScheduleParts(date)
   )
 }
 

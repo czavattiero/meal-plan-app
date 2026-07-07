@@ -16,7 +16,7 @@ npm run build
 ## Scheduled push notifications
 
 Notification reminders are no longer scheduled by GitHub Actions. Use an external cron
-service to call the deployed cron endpoint every 30 minutes:
+service to call the deployed cron endpoint every 15 minutes:
 
 - URL: `https://<your-app-domain>/api/push/cron`
 - Auth: either add `?secret=<CRON_SECRET>` or send the same secret in the
@@ -24,4 +24,4 @@ service to call the deployed cron endpoint every 30 minutes:
 - Environment variable: `CRON_SECRET`
 
 The endpoint calculates due reminders in Calgary time (`America/Edmonton`) and already
-handles delayed runs by checking the current and previous half-hour slots.
+handles delayed runs by checking the current and previous quarter-hour slots.

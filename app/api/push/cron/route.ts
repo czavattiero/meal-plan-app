@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server'
 import {
   formatSlotKey,
   getDueRulesForScheduleParts,
-  getMostRecentHalfHourScheduleParts,
+  getMostRecentQuarterHourScheduleParts,
   getNotificationScheduleParts,
-  getPrevHalfHourScheduleParts,
+  getPrevQuarterHourScheduleParts,
   mergeRulePreferences,
 } from '@/lib/notifications'
 import { sendPush } from '@/lib/sendPush'
@@ -28,8 +28,8 @@ export async function GET(request: Request) {
   const now = new Date()
   const { hour: currentHour, minute: currentMinute } =
     getNotificationScheduleParts(now)
-  const currentSlot = getMostRecentHalfHourScheduleParts(now)
-  const prevSlot = getPrevHalfHourScheduleParts(now)
+  const currentSlot = getMostRecentQuarterHourScheduleParts(now)
+  const prevSlot = getPrevQuarterHourScheduleParts(now)
   const currentSlotKey = formatSlotKey(currentSlot)
   const prevSlotKey = formatSlotKey(prevSlot)
   const { hour, minute, dayOfWeek } = currentSlot
