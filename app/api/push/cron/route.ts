@@ -16,9 +16,11 @@ import {
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization')
+  const secretParam = new URL(request.url).searchParams.get('secret')
   if (
     process.env.CRON_SECRET &&
-    authHeader !== 'Bearer ' + process.env.CRON_SECRET
+    authHeader !== 'Bearer ' + process.env.CRON_SECRET &&
+    secretParam !== process.env.CRON_SECRET
   ) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -60,7 +62,7 @@ export async function GET(request: Request) {
   }
 
   // For each subscription determine which slots (previous and/or current) have
-  // not yet been processed, to recover from late or skipped GitHub Actions runs.
+  // not yet been processed, to recover from late or skipped scheduler runs.
   const dueNotifications = (subscriptions ?? []).flatMap(subscription => {
     const rules = mergeRulePreferences(subscription.notification_rules)
     const lastFired: string = subscription.last_notified_slot ?? ''
@@ -123,4 +125,3 @@ export async function GET(request: Request) {
     prevSlotKey,
   })
 }
-
