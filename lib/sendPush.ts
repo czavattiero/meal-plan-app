@@ -3,6 +3,11 @@ import { createServerClient } from '@/lib/supabase'
 
 let vapidInitialized = false
 
+// After this many consecutive push failures for a single device, the
+// subscription is considered permanently broken and is deleted so the device
+// re-subscribes on next app open.
+const CONSECUTIVE_FAILURE_THRESHOLD = 5
+
 function initVapid() {
   if (vapidInitialized) return
   if (!process.env.VAPID_EMAIL || !process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
@@ -92,6 +97,12 @@ export async function sendPush(payload: PushPayload): Promise<PushResult> {
       try {
         await webpush.sendNotification(subscription, jsonPayload)
         console.info('Push sent', { deviceId: device_id })
+        // Reset failure counter on success (best-effort; ignore if column missing)
+        await db
+          .from('push_subscriptions')
+          .update({ consecutive_failures: 0 })
+          .eq('device_id', device_id)
+          .then(() => undefined, () => undefined)
         return {
           deviceId: device_id,
           ok: true,
@@ -103,9 +114,32 @@ export async function sendPush(payload: PushPayload): Promise<PushResult> {
         const statusCode = (err as { statusCode?: number }).statusCode
         const errorMessage =
           err instanceof Error ? err.message : 'Unknown push send error'
-        const deleted = statusCode === 410 || statusCode === 404
+        let deleted = statusCode === 410 || statusCode === 404
         if (statusCode === 410 || statusCode === 404) {
           await db.from('push_subscriptions').delete().eq('device_id', device_id)
+        } else {
+          // For all other failures (e.g. 400 expired token, network errors),
+          // increment the consecutive failure counter and delete the
+          // subscription once the threshold is exceeded.  This breaks the
+          // loop where a permanently broken subscription is never cleaned up
+          // because it never returns 404 / 410.
+          const { data: sub } = await db
+            .from('push_subscriptions')
+            .select('consecutive_failures')
+            .eq('device_id', device_id)
+            .single()
+            .then(r => r, () => ({ data: null }))
+          const failures = ((sub as { consecutive_failures?: number } | null)?.consecutive_failures ?? 0) + 1
+          if (failures >= CONSECUTIVE_FAILURE_THRESHOLD) {
+            await db.from('push_subscriptions').delete().eq('device_id', device_id)
+            deleted = true
+          } else {
+            await db
+              .from('push_subscriptions')
+              .update({ consecutive_failures: failures })
+              .eq('device_id', device_id)
+              .then(() => undefined, () => undefined)
+          }
         }
         console.error('Push failed', {
           deviceId: device_id,
