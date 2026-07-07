@@ -14,6 +14,11 @@ import {
   isMissingNotificationRulesColumnError,
 } from '@/lib/pushSubscriptionSchema'
 
+function normalizeLastNotifiedSlot(value: unknown): string {
+  if (typeof value !== 'string') return ''
+  return /^\d{4}-\d{2}-\d{2}-\d{2}:\d{2}$/.test(value) ? value : ''
+}
+
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization')
   const secretParam = new URL(request.url).searchParams.get('secret')
@@ -65,7 +70,7 @@ export async function GET(request: Request) {
   // not yet been processed, to recover from late or skipped scheduler runs.
   const dueNotifications = (subscriptions ?? []).flatMap(subscription => {
     const rules = mergeRulePreferences(subscription.notification_rules)
-    const lastFired: string = subscription.last_notified_slot ?? ''
+    const lastFired = normalizeLastNotifiedSlot(subscription.last_notified_slot)
 
     const slotsToCheck = []
     if (prevSlotKey > lastFired) slotsToCheck.push(prevSlot)
