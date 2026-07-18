@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { href: '/week/1', label: 'Week 1', icon: '1️⃣' },
   { href: '/week/2', label: 'Week 2', icon: '2️⃣' },
   { href: '/week/3', label: 'Week 3', icon: '3️⃣' },
+  { href: '/foods', label: 'Foods', icon: '🥗' },
   { href: '/settings', label: 'Settings', icon: '⚙️' },
 ]
 
