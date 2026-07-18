@@ -74,63 +74,85 @@ function Chip({
 }
 
 function FoodRow({ food }: { food: Food }) {
+  const isAlcohol = food.category === 'alcohol'
   return (
     <div
       style={{
         background: COLORS.white,
-        border: `0.5px solid ${COLORS.greenBorder}`,
+        border: `0.5px solid ${isAlcohol ? '#f0c99a' : COLORS.greenBorder}`,
         borderRadius: '12px',
         padding: '14px 16px',
         display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
+        flexDirection: 'column',
+        gap: '8px',
       }}
     >
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: '13px', fontWeight: 600, color: COLORS.ink, marginBottom: '2px' }}>
-          {food.name}
-        </div>
-        {(food.category || food.serving_desc) && (
-          <div style={{ fontSize: '10px', color: COLORS.muted }}>
-            {food.category && <span style={{ textTransform: 'capitalize' }}>{food.category}</span>}
-            {food.category && food.serving_desc && ' · '}
-            {food.serving_desc && <span>per {food.serving_desc}</span>}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: '13px', fontWeight: 600, color: COLORS.ink, marginBottom: '2px' }}>
+            {food.name}
           </div>
-        )}
+          {(food.category || food.serving_desc) && (
+            <div style={{ fontSize: '10px', color: COLORS.muted }}>
+              {food.category && <span style={{ textTransform: 'capitalize' }}>{food.category}</span>}
+              {food.category && food.serving_desc && ' · '}
+              {food.serving_desc && <span>per {food.serving_desc}</span>}
+            </div>
+          )}
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'flex-end',
+            gap: '4px',
+            maxWidth: '150px',
+          }}
+        >
+          <Chip bg={COLORS.yellowPale} color={COLORS.yellowDeep} border={COLORS.yellowBorder}>
+            {food.calories ?? '–'} kcal
+          </Chip>
+          {food.protein_g != null && (
+            <Chip bg={COLORS.greenPale} color={COLORS.greenDark} border={COLORS.greenBorder}>
+              P {food.protein_g}g
+            </Chip>
+          )}
+          {food.carbs_g != null && (
+            <Chip bg={COLORS.blueBg} color={COLORS.blueText} border={COLORS.blueBg}>
+              C {food.carbs_g}g
+            </Chip>
+          )}
+          {food.fat_g != null && (
+            <Chip bg={COLORS.purpleBg} color={COLORS.purpleText} border={COLORS.purpleBg}>
+              F {food.fat_g}g
+            </Chip>
+          )}
+          {food.fiber_g != null && (
+            <Chip bg={COLORS.tealBg} color={COLORS.tealText} border={COLORS.tealBg}>
+              Fibre {food.fiber_g}g
+            </Chip>
+          )}
+        </div>
       </div>
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'flex-end',
-          gap: '4px',
-          maxWidth: '150px',
-        }}
-      >
-        <Chip bg={COLORS.yellowPale} color={COLORS.yellowDeep} border={COLORS.yellowBorder}>
-          {food.calories ?? '–'} kcal
-        </Chip>
-        {food.protein_g != null && (
-          <Chip bg={COLORS.greenPale} color={COLORS.greenDark} border={COLORS.greenBorder}>
-            P {food.protein_g}g
-          </Chip>
-        )}
-        {food.carbs_g != null && (
-          <Chip bg={COLORS.blueBg} color={COLORS.blueText} border={COLORS.blueBg}>
-            C {food.carbs_g}g
-          </Chip>
-        )}
-        {food.fat_g != null && (
-          <Chip bg={COLORS.purpleBg} color={COLORS.purpleText} border={COLORS.purpleBg}>
-            F {food.fat_g}g
-          </Chip>
-        )}
-        {food.fiber_g != null && (
-          <Chip bg={COLORS.tealBg} color={COLORS.tealText} border={COLORS.tealBg}>
-            Fibre {food.fiber_g}g
-          </Chip>
-        )}
-      </div>
+      {isAlcohol && (
+        <div
+          style={{
+            fontSize: '10px',
+            fontWeight: 600,
+            color: '#92600a',
+            background: '#fffbeb',
+            border: '0.5px solid #f5d67a',
+            borderRadius: '8px',
+            padding: '5px 8px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+          }}
+        >
+          <span>⚠️</span>
+          <span>Affects blood sugar — can interact with medications</span>
+        </div>
+      )}
     </div>
   )
 }
