@@ -6,6 +6,7 @@ type Food = {
   id: number
   name: string
   category: string | null
+  serving_desc: string | null
   calories: number | null
   protein_g: number | null
   carbs_g: number | null
@@ -89,9 +90,11 @@ function FoodRow({ food }: { food: Food }) {
         <div style={{ fontSize: '13px', fontWeight: 600, color: COLORS.ink, marginBottom: '2px' }}>
           {food.name}
         </div>
-        {food.category && (
-          <div style={{ fontSize: '10px', color: COLORS.muted, textTransform: 'capitalize' }}>
-            {food.category}
+        {(food.category || food.serving_desc) && (
+          <div style={{ fontSize: '10px', color: COLORS.muted }}>
+            {food.category && <span style={{ textTransform: 'capitalize' }}>{food.category}</span>}
+            {food.category && food.serving_desc && ' · '}
+            {food.serving_desc && <span>per {food.serving_desc}</span>}
           </div>
         )}
       </div>
