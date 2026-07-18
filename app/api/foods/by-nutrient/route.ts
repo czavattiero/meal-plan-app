@@ -34,7 +34,7 @@ export async function GET(request: Request) {
 
   let query = db
     .from('foods')
-    .select('id, name, category, calories, protein_g, carbs_g, fat_g, fiber_g, sugar_g, sodium_mg')
+    .select('id, name, category, serving_desc, calories, protein_g, carbs_g, fat_g, fiber_g, sugar_g, sodium_mg')
     .not(nutrient, 'is', null)
     .order(nutrient, { ascending: direction === 'asc' })
     .limit(limit)
