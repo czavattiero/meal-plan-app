@@ -23,38 +23,109 @@ const NUTRIENT_PRESETS: { label: string; nutrient: string; direction: 'asc' | 'd
   { label: 'Low Sodium', nutrient: 'sodium_mg', direction: 'asc' },
 ]
 
-function MacroRow({ food }: { food: Food }) {
+const COLORS = {
+  greenDark: '#1a4a2e',
+  greenMid: '#2d7a4a',
+  greenPale: '#f0f7f3',
+  greenBorder: '#cce4d6',
+  ink: '#0f2419',
+  muted: '#5a7a68',
+  yellowPale: '#fffbeb',
+  yellowBorder: '#f5d67a',
+  yellowDeep: '#c8900a',
+  blueBg: '#e0f0ff',
+  blueText: '#1a4a7a',
+  purpleBg: '#f0edff',
+  purpleText: '#4a3ab0',
+  tealBg: '#e0f5f2',
+  tealText: '#0f6d63',
+  white: '#ffffff',
+}
+
+function Chip({
+  children,
+  bg,
+  color,
+  border,
+}: {
+  children: React.ReactNode
+  bg: string
+  color: string
+  border: string
+}) {
   return (
-    <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3">
-      <div>
-        <p className="text-sm font-semibold text-gray-900">{food.name}</p>
+    <span
+      style={{
+        display: 'inline-block',
+        fontSize: '10px',
+        fontWeight: 700,
+        padding: '2px 8px',
+        borderRadius: '20px',
+        background: bg,
+        color,
+        border: `0.5px solid ${border}`,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {children}
+    </span>
+  )
+}
+
+function FoodRow({ food }: { food: Food }) {
+  return (
+    <div
+      style={{
+        background: COLORS.white,
+        border: `0.5px solid ${COLORS.greenBorder}`,
+        borderRadius: '12px',
+        padding: '14px 16px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+      }}
+    >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: '13px', fontWeight: 600, color: COLORS.ink, marginBottom: '2px' }}>
+          {food.name}
+        </div>
         {food.category && (
-          <p className="text-xs text-gray-500 capitalize">{food.category}</p>
+          <div style={{ fontSize: '10px', color: COLORS.muted, textTransform: 'capitalize' }}>
+            {food.category}
+          </div>
         )}
       </div>
-      <div className="flex flex-wrap items-center justify-end gap-1.5 text-right">
-        <span className="rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 text-xs font-bold text-amber-700">
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'flex-end',
+          gap: '4px',
+          maxWidth: '150px',
+        }}
+      >
+        <Chip bg={COLORS.yellowPale} color={COLORS.yellowDeep} border={COLORS.yellowBorder}>
           {food.calories ?? '–'} kcal
-        </span>
+        </Chip>
         {food.protein_g != null && (
-          <span className="rounded-full bg-green-50 border border-green-200 px-2 py-0.5 text-xs font-semibold text-green-700">
+          <Chip bg={COLORS.greenPale} color={COLORS.greenDark} border={COLORS.greenBorder}>
             P {food.protein_g}g
-          </span>
+          </Chip>
         )}
         {food.carbs_g != null && (
-          <span className="rounded-full bg-blue-50 border border-blue-200 px-2 py-0.5 text-xs font-semibold text-blue-700">
+          <Chip bg={COLORS.blueBg} color={COLORS.blueText} border={COLORS.blueBg}>
             C {food.carbs_g}g
-          </span>
+          </Chip>
         )}
         {food.fat_g != null && (
-          <span className="rounded-full bg-purple-50 border border-purple-200 px-2 py-0.5 text-xs font-semibold text-purple-700">
+          <Chip bg={COLORS.purpleBg} color={COLORS.purpleText} border={COLORS.purpleBg}>
             F {food.fat_g}g
-          </span>
+          </Chip>
         )}
         {food.fiber_g != null && (
-          <span className="rounded-full bg-teal-50 border border-teal-200 px-2 py-0.5 text-xs font-semibold text-teal-700">
+          <Chip bg={COLORS.tealBg} color={COLORS.tealText} border={COLORS.tealBg}>
             Fibre {food.fiber_g}g
-          </span>
+          </Chip>
         )}
       </div>
     </div>
@@ -119,44 +190,67 @@ export default function FoodSearch() {
   }, [lookupQuery, mode, fetchLookup])
 
   return (
-    <div className="mx-auto max-w-xl">
-      <div className="mb-4 flex gap-2 rounded-full bg-gray-100 p-1">
-        <button
-          onClick={() => setMode('nutrient')}
-          className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold transition ${
-            mode === 'nutrient' ? 'bg-white shadow text-green-800' : 'text-gray-500'
-          }`}
-        >
-          Find by nutrient
-        </button>
-        <button
-          onClick={() => setMode('lookup')}
-          className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold transition ${
-            mode === 'lookup' ? 'bg-white shadow text-green-800' : 'text-gray-500'
-          }`}
-        >
-          Look up a food
-        </button>
+    <div>
+      {/* Segmented tab switcher */}
+      <div
+        style={{
+          display: 'flex',
+          gap: '4px',
+          background: COLORS.greenPale,
+          border: `0.5px solid ${COLORS.greenBorder}`,
+          borderRadius: '12px',
+          padding: '4px',
+          marginBottom: '16px',
+        }}
+      >
+        {(['nutrient', 'lookup'] as const).map(m => (
+          <button
+            key={m}
+            onClick={() => setMode(m)}
+            style={{
+              flex: 1,
+              border: 'none',
+              borderRadius: '9px',
+              padding: '10px 12px',
+              fontSize: '12px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              background: mode === m ? COLORS.greenDark : 'transparent',
+              color: mode === m ? COLORS.white : COLORS.muted,
+              transition: 'all 0.15s',
+            }}
+          >
+            {m === 'nutrient' ? 'Find by nutrient' : 'Look up a food'}
+          </button>
+        ))}
       </div>
 
       {mode === 'nutrient' ? (
-        <div className="mb-4 flex flex-wrap gap-2">
-          {NUTRIENT_PRESETS.map(preset => (
-            <button
-              key={preset.label}
-              onClick={() => {
-                setActivePreset(preset)
-                fetchByNutrient(preset)
-              }}
-              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                activePreset.label === preset.label
-                  ? 'border-green-700 bg-green-700 text-white'
-                  : 'border-gray-300 text-gray-600 hover:border-green-400'
-              }`}
-            >
-              {preset.label}
-            </button>
-          ))}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px' }}>
+          {NUTRIENT_PRESETS.map(preset => {
+            const active = activePreset.label === preset.label
+            return (
+              <button
+                key={preset.label}
+                onClick={() => {
+                  setActivePreset(preset)
+                  fetchByNutrient(preset)
+                }}
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  padding: '6px 12px',
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  border: `0.5px solid ${active ? COLORS.greenDark : COLORS.greenBorder}`,
+                  background: active ? COLORS.greenDark : COLORS.white,
+                  color: active ? COLORS.white : COLORS.muted,
+                }}
+              >
+                {preset.label}
+              </button>
+            )
+          })}
         </div>
       ) : (
         <input
@@ -164,18 +258,38 @@ export default function FoodSearch() {
           value={lookupQuery}
           onChange={e => setLookupQuery(e.target.value)}
           placeholder="e.g. avocado, chicken thigh, greek yogurt..."
-          className="mb-4 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+          style={{
+            width: '100%',
+            boxSizing: 'border-box',
+            marginBottom: '16px',
+            padding: '12px 14px',
+            fontSize: '13px',
+            borderRadius: '12px',
+            border: `0.5px solid ${COLORS.greenBorder}`,
+            outline: 'none',
+            color: COLORS.ink,
+          }}
         />
       )}
 
-      <div className="space-y-2">
-        {loading && <p className="text-sm text-gray-400">Searching…</p>}
-        {error && <p className="text-sm text-red-600">{error}</p>}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {loading && (
+          <p style={{ fontSize: '12px', color: COLORS.muted, textAlign: 'center', padding: '12px 0' }}>
+            Searching…
+          </p>
+        )}
+        {error && (
+          <p style={{ fontSize: '12px', color: '#b00020', textAlign: 'center', padding: '12px 0' }}>
+            {error}
+          </p>
+        )}
         {!loading && !error && results.length === 0 && mode === 'lookup' && lookupQuery.length >= 2 && (
-          <p className="text-sm text-gray-400">No matches found.</p>
+          <p style={{ fontSize: '12px', color: COLORS.muted, textAlign: 'center', padding: '12px 0' }}>
+            No matches found.
+          </p>
         )}
         {results.map(food => (
-          <MacroRow key={food.id} food={food} />
+          <FoodRow key={food.id} food={food} />
         ))}
       </div>
     </div>
