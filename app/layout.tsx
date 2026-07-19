@@ -5,7 +5,7 @@ import NavBar from '@/components/NavBar'
 
 export const metadata: Metadata = {
   title: "Sophia's Meal Plan",
-  description: 'Your personal 15-day healthy meal plan',
+  description: 'Sophia's meal plan',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
