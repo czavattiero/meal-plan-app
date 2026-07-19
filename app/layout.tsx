@@ -4,7 +4,7 @@ import NotificationProvider from '@/components/NotificationProvider'
 import NavBar from '@/components/NavBar'
 
 export const metadata: Metadata = {
-  title: 'Sophia's Meal Plan',
+  title: "Sophia's Meal Plan",
   description: 'Your personal 15-day healthy meal plan',
   manifest: '/manifest.json',
   appleWebApp: {
