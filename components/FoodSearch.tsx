@@ -21,7 +21,6 @@ const NUTRIENT_PRESETS: { label: string; nutrient: string; direction: 'asc' | 'd
   { label: 'High Fibre', nutrient: 'fiber_g', direction: 'desc' },
   { label: 'Low Carb', nutrient: 'carbs_g', direction: 'asc' },
   { label: 'Low Calorie', nutrient: 'calories', direction: 'asc' },
-  { label: 'Low Sodium', nutrient: 'sodium_mg', direction: 'asc' },
 ]
 
 const COLORS = {
