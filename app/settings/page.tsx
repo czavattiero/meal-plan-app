@@ -98,7 +98,7 @@ export default function SettingsPage() {
 
   return (
     <div style={{ padding: '24px 16px' }}>
-      <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#1a4a2e', marginBottom: '6px' }}>
+      <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#2b0a5e', marginBottom: '6px' }}>
         Settings
       </h1>
       <p style={{ fontSize: '13px', color: '#5a7a68', marginBottom: '24px', lineHeight: 1.6 }}>
@@ -116,13 +116,13 @@ export default function SettingsPage() {
         }}
       >
         <h2 style={{
-          fontSize: '12px', fontWeight: 700, color: '#1a4a2e',
+          fontSize: '12px', fontWeight: 700, color: '#2b0a5e',
           margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em',
         }}>
           Notification schedule (Calgary, Alberta time, every 15 minutes)
         </h2>
         <span style={{
-          fontSize: '14px', color: '#1a4a2e', flexShrink: 0, marginLeft: '8px',
+          fontSize: '14px', color: '#2b0a5e', flexShrink: 0, marginLeft: '8px',
           display: 'inline-block',
           transform: scheduleOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
           transition: 'transform 0.2s',
@@ -162,7 +162,7 @@ export default function SettingsPage() {
                 fontSize: '12px', fontFamily: 'monospace',
                 border: '0.5px solid #cce4d6', borderRadius: '6px',
                 padding: '4px 6px', background: '#f0f7f3',
-                color: '#1a4a2e', cursor: 'pointer', flexShrink: 0,
+                color: '#2b0a5e', cursor: 'pointer', flexShrink: 0,
               }}
             />
             <button
@@ -172,7 +172,7 @@ export default function SettingsPage() {
                 position: 'relative', width: '40px', height: '22px',
                 borderRadius: '11px', border: 'none', cursor: 'pointer',
                 flexShrink: 0,
-                background: rule.enabled ? '#1a4a2e' : '#ccc',
+                background: rule.enabled ? '#2b0a5e' : '#ccc',
                 transition: 'background 0.2s',
               }}
             >
@@ -191,7 +191,7 @@ export default function SettingsPage() {
       )}
 
       <h2 style={{
-        fontSize: '12px', fontWeight: 700, color: '#1a4a2e',
+        fontSize: '12px', fontWeight: 700, color: '#2b0a5e',
         marginTop: '24px', marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.06em',
       }}>
         Send test notification
@@ -221,7 +221,7 @@ export default function SettingsPage() {
             borderRadius: '6px',
             padding: '8px 10px',
             background: '#f0f7f3',
-            color: '#1a4a2e',
+            color: '#2b0a5e',
           }}
         />
         <input
@@ -236,14 +236,14 @@ export default function SettingsPage() {
             borderRadius: '6px',
             padding: '8px 10px',
             background: '#f0f7f3',
-            color: '#1a4a2e',
+            color: '#2b0a5e',
           }}
         />
         <button
           type="submit"
           disabled={sending}
           style={{
-            background: sending ? '#89a899' : '#1a4a2e',
+            background: sending ? '#89a899' : '#2b0a5e',
             color: '#fff',
             border: 'none',
             borderRadius: '6px',
@@ -260,9 +260,9 @@ export default function SettingsPage() {
           <div
             style={{
               fontSize: '12px',
-              color: sendResult.type === 'success' ? '#1a4a2e' : '#842029',
-              background: sendResult.type === 'success' ? '#e8f5ed' : '#f8d7da',
-              border: `0.5px solid ${sendResult.type === 'success' ? '#b8ddc8' : '#f1aeb5'}`,
+              color: sendResult.type === 'success' ? '#2b0a5e' : '#842029',
+              background: sendResult.type === 'success' ? '#f6e9ff' : '#f8d7da',
+              border: `0.5px solid ${sendResult.type === 'success' ? '#e0b3ff' : '#f1aeb5'}`,
               borderRadius: '8px',
               padding: '8px 10px',
               lineHeight: 1.5,
@@ -282,9 +282,9 @@ export default function SettingsPage() {
 
       <div style={{
         marginTop: '24px', padding: '14px 16px',
-        background: '#e8f5ed', borderRadius: '12px',
-        fontSize: '12px', color: '#1a4a2e', lineHeight: 1.7,
-        border: '0.5px solid #b8ddc8',
+        background: '#f6e9ff', borderRadius: '12px',
+        fontSize: '12px', color: '#2b0a5e', lineHeight: 1.7,
+        border: '0.5px solid #e0b3ff',
       }}>
         <strong>About push notifications:</strong> To receive notifications when
         the app is closed, use Safari on an iPhone running iOS 16.4+ (iPhone 8 or

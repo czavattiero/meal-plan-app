@@ -42,7 +42,7 @@ export default function NotificationProvider({
       )}
       {showPrompt && pushSupport?.canSubscribe && (
         <div style={{
-          background: '#1a4a2e',
+          background: '#2b0a5e',
           color: '#fff',
           padding: '12px 16px',
           display: 'flex',
@@ -66,8 +66,8 @@ export default function NotificationProvider({
                 setShowPrompt(permission === 'default')
               }}
               style={{
-                background: '#f0b429',
-                color: '#1a4a2e',
+                background: '#ffc300',
+                color: '#2b0a5e',
                 border: 'none',
                 borderRadius: '6px',
                 padding: '6px 12px',

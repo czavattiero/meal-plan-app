@@ -26,7 +26,7 @@ export default function NotificationBanner({ notifications, onDismiss }: Props) 
           alignItems: 'flex-start',
           gap: '12px',
           padding: '12px 14px',
-          background: '#1a4a2e',
+          background: '#2b0a5e',
           borderRadius: '12px',
           color: '#ffffff',
           pointerEvents: 'auto',

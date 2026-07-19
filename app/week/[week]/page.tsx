@@ -18,11 +18,11 @@ export default async function WeekPage({ params }: Props) {
   return (
     <div style={{ padding: '20px 16px' }}>
       <div style={{
-        background: 'linear-gradient(90deg, #1a4a2e 0%, #2d7a4a 100%)',
+        background: 'linear-gradient(90deg, #2b0a5e 0%, #e6007e 100%)',
         borderRadius: '14px', padding: '18px 20px',
         marginBottom: '20px', color: '#ffffff',
       }}>
-        <div style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#f0b429', marginBottom: '4px' }}>
+        <div style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#ffc300', marginBottom: '4px' }}>
           Week {weekNum}
         </div>
         <div style={{ fontSize: '20px', fontWeight: 700, marginBottom: '4px' }}>
@@ -41,7 +41,7 @@ export default async function WeekPage({ params }: Props) {
           }}>
             <div style={{
               width: '38px', height: '38px', borderRadius: '50%',
-              background: '#1a4a2e', color: '#f0b429',
+              background: '#2b0a5e', color: '#ffc300',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '16px', fontWeight: 700, flexShrink: 0,
             }}>
@@ -53,7 +53,7 @@ export default async function WeekPage({ params }: Props) {
                 {day.breakfast.calories + day.lunch.calories + day.dinner.calories} kcal meals total
               </div>
             </div>
-            <div style={{ fontSize: '11px', color: '#2d7a4a', flexShrink: 0 }}>▼</div>
+            <div style={{ fontSize: '11px', color: '#e6007e', flexShrink: 0 }}>▼</div>
           </summary>
 
           <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -65,8 +65,8 @@ export default async function WeekPage({ params }: Props) {
           {day.leftover && (
             <div style={{
               marginTop: '10px', padding: '10px 14px',
-              background: '#e8f5ed', borderRadius: '8px',
-              fontSize: '12px', color: '#2d7a4a',
+              background: '#f6e9ff', borderRadius: '8px',
+              fontSize: '12px', color: '#e6007e',
               display: 'flex', gap: '8px', alignItems: 'flex-start',
             }}>
               <span>♻️</span>
@@ -78,10 +78,10 @@ export default async function WeekPage({ params }: Props) {
 
       <details style={{ marginBottom: '28px' }}>
         <summary style={{ cursor: 'pointer', listStyle: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-          <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#1a4a2e', margin: 0 }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#2b0a5e', margin: 0 }}>
             Week {weekNum} Snacks
           </h2>
-          <span style={{ fontSize: '11px', color: '#2d7a4a' }}>▼</span>
+          <span style={{ fontSize: '11px', color: '#e6007e' }}>▼</span>
         </summary>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {weekData.snacks.map((snack: Snack) => (
@@ -105,8 +105,8 @@ export default async function WeekPage({ params }: Props) {
               </div>
               <span style={{
                 fontSize: '10px', fontWeight: 700,
-                background: '#fffbeb', color: '#c8900a',
-                border: '0.5px solid #f5d67a',
+                background: '#fffbe0', color: '#cc7a00',
+                border: '0.5px solid #ffe066',
                 padding: '2px 7px', borderRadius: '20px', flexShrink: 0,
               }}>
                 ~{snack.calories} kcal
@@ -118,10 +118,10 @@ export default async function WeekPage({ params }: Props) {
 
       <details>
         <summary style={{ cursor: 'pointer', listStyle: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-          <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#1a4a2e', margin: 0 }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#2b0a5e', margin: 0 }}>
             Week {weekNum} Grocery List
           </h2>
-          <span style={{ fontSize: '11px', color: '#2d7a4a' }}>▼</span>
+          <span style={{ fontSize: '11px', color: '#e6007e' }}>▼</span>
         </summary>
         <GroceryChecklist week={weekNum} items={weekData.groceryList} />
       </details>

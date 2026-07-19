@@ -8,9 +8,9 @@ type Props = {
 }
 
 const VARIANT_CONFIG = {
-  breakfast: { label: '☀️ Breakfast', color: '#f0b429', bg: '#fffbeb', border: '#f5d67a' },
-  lunch:     { label: '🥗 Lunch',     color: '#2d7a4a', bg: '#f0f7f3', border: '#b8ddc8' },
-  dinner:    { label: '🍽 Dinner',    color: '#6d5de6', bg: '#f3f0ff', border: '#c4b8f0' },
+  breakfast: { label: '☀️ Breakfast', color: '#ffc300', bg: '#fffbe0', border: '#ffe066' },
+  lunch:     { label: '🥗 Lunch',     color: '#e6007e', bg: '#f0f7f3', border: '#e0b3ff' },
+  dinner:    { label: '🍽 Dinner',    color: '#00c2ff', bg: '#e0f7ff', border: '#c4b8f0' },
 }
 
 export default function MealCard({ meal, variant }: Props) {
@@ -43,8 +43,8 @@ export default function MealCard({ meal, variant }: Props) {
         <div style={{ display: 'flex', gap: '8px', marginBottom: '10px', flexWrap: 'wrap' }}>
           <span style={{
             fontSize: '10px', fontWeight: 700,
-            background: '#fffbeb', color: '#c8900a',
-            border: '0.5px solid #f5d67a',
+            background: '#fffbe0', color: '#cc7a00',
+            border: '0.5px solid #ffe066',
             padding: '2px 8px', borderRadius: '20px',
           }}>
             ~{meal.calories} kcal
@@ -90,7 +90,7 @@ export default function MealCard({ meal, variant }: Props) {
           <div style={{ marginTop: '14px' }}>
             <div style={{ marginBottom: '14px' }}>
               <div style={{
-                fontSize: '11px', fontWeight: 700, color: '#2d7a4a',
+                fontSize: '11px', fontWeight: 700, color: '#e6007e',
                 marginBottom: '7px', textTransform: 'uppercase', letterSpacing: '0.06em',
               }}>
                 Ingredients
@@ -111,7 +111,7 @@ export default function MealCard({ meal, variant }: Props) {
 
             <div style={{ marginBottom: '14px' }}>
               <div style={{
-                fontSize: '11px', fontWeight: 700, color: '#2d7a4a',
+                fontSize: '11px', fontWeight: 700, color: '#e6007e',
                 marginBottom: '7px', textTransform: 'uppercase', letterSpacing: '0.06em',
               }}>
                 Steps

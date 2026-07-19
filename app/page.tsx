@@ -25,7 +25,7 @@ export default function HomePage() {
   return (
     <div style={{ padding: '24px 16px' }}>
       <div style={{
-        background: 'linear-gradient(135deg, #1a4a2e 0%, #2d7a4a 100%)',
+        background: 'linear-gradient(135deg, #2b0a5e 0%, #e6007e 100%)',
         borderRadius: '16px',
         padding: '28px 24px',
         marginBottom: '24px',
@@ -33,14 +33,14 @@ export default function HomePage() {
       }}>
         <div style={{
           fontSize: '11px', letterSpacing: '0.2em',
-          textTransform: 'uppercase', color: '#f0b429',
+          textTransform: 'uppercase', color: '#ffc300',
           marginBottom: '8px', fontWeight: 700,
         }}>
           Your plan
         </div>
         <h1 style={{ fontSize: '28px', fontWeight: 700, margin: '0 0 8px', lineHeight: 1.1 }}>
           15-Day<br />
-          <span style={{ color: '#f0b429' }}>Meal Plan</span>
+          <span style={{ color: '#ffc300' }}>Meal Plan</span>
         </h1>
         <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', margin: 0, lineHeight: 1.5 }}>
           High protein · High fibre · Low sugar<br />
@@ -49,8 +49,8 @@ export default function HomePage() {
       </div>
 
       <div style={{
-        background: '#fffbeb',
-        border: '0.5px solid #f5d67a',
+        background: '#fffbe0',
+        border: '0.5px solid #ffe066',
         borderRadius: '12px',
         padding: '14px 16px',
         marginBottom: '24px',
@@ -60,7 +60,7 @@ export default function HomePage() {
       }}>
         <strong style={{
           display: 'block', marginBottom: '4px',
-          color: '#c8900a', textTransform: 'uppercase',
+          color: '#cc7a00', textTransform: 'uppercase',
           fontSize: '10px', letterSpacing: '0.1em',
         }}>
           Smart eating rules
@@ -79,7 +79,7 @@ export default function HomePage() {
         }}>
           <summary style={{
             fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase',
-            color: '#2d7a4a', fontWeight: 700, cursor: 'pointer',
+            color: '#e6007e', fontWeight: 700, cursor: 'pointer',
           }}>
             GLP-1 Booster
           </summary>
@@ -99,7 +99,7 @@ export default function HomePage() {
               },
             ].map(group => (
               <div key={group.label} style={{ marginBottom: '10px' }}>
-                <div style={{ fontSize: '11px', fontWeight: 600, color: '#1a4a2e', marginBottom: '4px' }}>
+                <div style={{ fontSize: '11px', fontWeight: 600, color: '#2b0a5e', marginBottom: '4px' }}>
                   {group.label}
                 </div>
                 <ul style={{ margin: 0, paddingLeft: '16px', listStyle: 'disc' }}>
@@ -113,14 +113,14 @@ export default function HomePage() {
         </details>
 
         <details style={{
-          background: '#fffbeb',
-          border: '0.5px solid #f5d67a',
+          background: '#fffbe0',
+          border: '0.5px solid #ffe066',
           borderRadius: '12px',
           padding: '14px 16px',
         }}>
           <summary style={{
             fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase',
-            color: '#c8900a', fontWeight: 700, cursor: 'pointer',
+            color: '#cc7a00', fontWeight: 700, cursor: 'pointer',
           }}>
             Low-calorie treats
           </summary>
@@ -168,10 +168,10 @@ export default function HomePage() {
             }}>
               <div style={{
                 width: '48px', height: '48px',
-                background: 'linear-gradient(135deg, #1a4a2e, #2d7a4a)',
+                background: 'linear-gradient(135deg, #2b0a5e, #e6007e)',
                 borderRadius: '12px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#f0b429', fontSize: '20px', fontWeight: 700, flexShrink: 0,
+                color: '#ffc300', fontSize: '20px', fontWeight: 700, flexShrink: 0,
               }}>
                 {w.week}
               </div>
@@ -187,8 +187,8 @@ export default function HomePage() {
                 </div>
               </div>
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: '#c8900a' }}>{w.kcal}</div>
-                <div style={{ fontSize: '18px', color: '#2d7a4a' }}>→</div>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#cc7a00' }}>{w.kcal}</div>
+                <div style={{ fontSize: '18px', color: '#e6007e' }}>→</div>
               </div>
             </div>
           </Link>
@@ -208,7 +208,7 @@ export default function HomePage() {
             textAlign: 'center',
             border: '0.5px solid #cce4d6',
           }}>
-            <div style={{ fontSize: '18px', fontWeight: 700, color: '#1a4a2e', marginBottom: '2px' }}>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: '#2b0a5e', marginBottom: '2px' }}>
               {s.val}
             </div>
             <div style={{
