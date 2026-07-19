@@ -41,10 +41,10 @@ export default function GroceryChecklist({ week, items }: Props) {
         padding: '12px 16px',
         background: '#f0f7f3',
         borderRadius: '12px',
-        border: '0.5px solid #b8ddc8',
+        border: '0.5px solid #e0b3ff',
       }}>
         <div>
-          <div style={{ fontSize: '13px', fontWeight: 600, color: '#1a4a2e' }}>
+          <div style={{ fontSize: '13px', fontWeight: 600, color: '#2b0a5e' }}>
             {checkedCount} of {total} items
           </div>
           <div style={{ fontSize: '11px', color: '#5a7a68', marginTop: '2px' }}>
@@ -59,7 +59,7 @@ export default function GroceryChecklist({ week, items }: Props) {
             <div style={{
               width: `${total > 0 ? (checkedCount / total) * 100 : 0}%`,
               height: '100%',
-              background: '#2d7a4a',
+              background: '#e6007e',
               borderRadius: '10px',
               transition: 'width 0.3s ease',
             }} />
@@ -68,7 +68,7 @@ export default function GroceryChecklist({ week, items }: Props) {
             onClick={reset}
             style={{
               fontSize: '11px', color: '#5a7a68',
-              background: 'none', border: '0.5px solid #b8ddc8',
+              background: 'none', border: '0.5px solid #e0b3ff',
               borderRadius: '20px', padding: '4px 10px', cursor: 'pointer',
             }}
           >
@@ -82,7 +82,7 @@ export default function GroceryChecklist({ week, items }: Props) {
           <div style={{
             fontSize: '11px', fontWeight: 700,
             letterSpacing: '0.06em', textTransform: 'uppercase',
-            color: '#2d7a4a', marginBottom: '8px',
+            color: '#e6007e', marginBottom: '8px',
             paddingBottom: '6px', borderBottom: '1px solid #e4f0ea',
           }}>
             {CATEGORY_LABELS[category]}
@@ -100,7 +100,7 @@ export default function GroceryChecklist({ week, items }: Props) {
                 checked={isChecked(item.id)}
                 onChange={() => toggle(item.id)}
                 style={{
-                  accentColor: '#2d7a4a',
+                  accentColor: '#e6007e',
                   width: '16px', height: '16px',
                   flexShrink: 0, cursor: 'pointer',
                 }}

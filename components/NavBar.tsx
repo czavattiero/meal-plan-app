@@ -40,14 +40,14 @@ export default function NavBar() {
               textDecoration: 'none',
               padding: '4px 8px',
               borderRadius: '8px',
-              background: isActive ? '#e8f5ed' : 'none',
+              background: isActive ? '#f6e9ff' : 'none',
             }}
           >
             <span style={{ fontSize: '20px' }}>{item.icon}</span>
             <span style={{
               fontSize: '10px',
               fontWeight: isActive ? 700 : 400,
-              color: isActive ? '#1a4a2e' : '#888',
+              color: isActive ? '#2b0a5e' : '#888',
             }}>
               {item.label}
             </span>

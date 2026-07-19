@@ -13,7 +13,7 @@ export default function SyncToast({ message, type }: Props) {
       bottom: '80px',
       left: '50%',
       transform: 'translateX(-50%)',
-      background: isOffline ? '#7a3a00' : '#1a4a2e',
+      background: isOffline ? '#7a3a00' : '#2b0a5e',
       color: '#ffffff',
       fontSize: '12px',
       fontWeight: 500,
